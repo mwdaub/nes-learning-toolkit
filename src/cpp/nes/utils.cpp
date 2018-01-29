@@ -123,7 +123,6 @@ void read(istream& in, char* val, uint32 length) {
   in.read(buf, length);
   memcpy(val, buf, length);
   delete[] buf;
-  cout << length << " bytes read." << endl;
 }
 
 void write(ostream& out, char* val, uint32 length) {
