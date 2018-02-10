@@ -5,12 +5,12 @@
 
 namespace nes {
 
-void Mapper7::Save(ostream& out) {
-  utils::write(out, prgBank);
+void Mapper7State::Save(ostream& out) {
+  utils::writeInt32(out, prgBank);
 }
 
-void Mapper7::Load(istream& in) {
-  utils::read(in, prgBank);
+void Mapper7State::Load(istream& in) {
+  prgBank = utils::readInt32(in);
 }
 
 uint8 Mapper7::Read(uint16 address) {

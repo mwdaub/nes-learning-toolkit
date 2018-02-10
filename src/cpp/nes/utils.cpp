@@ -6,128 +6,138 @@ namespace nes {
 
 namespace utils {
 
-void read(istream& in, bool& val) {
+bool readBool(istream& in) {
   char b;
   in.get(b);
-  val = b;
+  return bool(b);
 }
 
-void write(ostream& out, bool val) {
+void writeBool(ostream& out, bool val) {
   out.put(val);
 }
 
-void read(istream& in, uint8& val) {
+uint8 readUint8(istream& in) {
   char b;
   in.get(b);
-  val = b;
+  return uint8(b);
 }
 
-void write(ostream& out, uint8 val) {
+void writeUint8(ostream& out, uint8 val) {
   out.put(val);
 }
 
-void read(istream& in, int8& val) {
+int8 readInt8(istream& in) {
   char b;
   in.get(b);
-  val = b;
+  return int8(b);
 }
 
-void write(ostream& out, int8 val) {
+void writeInt8(ostream& out, int8 val) {
   out.put(val);
 }
 
-void read(istream& in, uint16& val) {
-  char buf[2];
-  in.read(&buf[0], 2);
-  val = (uint16(buf[1]) << 8) | buf[0];
+uint16 readUint16(istream& in) {
+  uint8 v1 = readUint8(in);
+  uint8 v2 = readUint8(in);
+  return (uint16(v2) << 8) | v1;
 }
 
-void write(ostream& out, uint16 val) {
-  out.put(val);
-  out.put(val >> 8);
+void writeUint16(ostream& out, uint16 val) {
+  writeUint8(out, uint8(val));
+  writeUint8(out, uint8(val >> 8));
 }
 
-void read(istream& in, int16& val) {
-  char buf[2];
-  in.read(&buf[0], 2);
-  val = (int16(buf[1]) << 8) | buf[0];
+int16 readInt16(istream& in) {
+  uint16 v = readUint16(in);
+  return int16(v);
 }
 
-void write(ostream& out, int16 val) {
-  out.put(val);
-  out.put(val >> 8);
+void writeInt16(ostream& out, int16 val) {
+  writeUint16(out, uint16(val));
 }
 
-void read(istream& in, uint32& val) {
-  char buf[4];
-  in.read(&buf[0], 4);
-  val = (uint32(buf[3]) << 24) | (uint32(buf[2]) << 16) | (uint32(buf[1]) << 8) | buf[0];
+uint32 readUint32(istream& in) {
+  uint16 v1 = readUint16(in);
+  uint16 v2 = readUint16(in);
+  return (uint32(v2) << 16) | v1;
 }
 
-void write(ostream& out, uint32 val) {
-  out.put(val);
-  out.put(val >> 8);
-  out.put(val >> 16);
-  out.put(val >> 24);
+void writeUint32(ostream& out, uint32 val) {
+  writeUint16(out, uint16(val));
+  writeUint16(out, uint16(val >> 16));
 }
 
-void read(istream& in, int32& val) {
-  char buf[4];
-  in.read(&buf[0], 4);
-  val = (int32(buf[3]) << 24) | (int32(buf[2]) << 16) | (int32(buf[1]) << 8) | buf[0];
+int32 readInt32(istream& in) {
+  uint32 v = readUint32(in);
+  return int32(v);
 }
 
-void write(ostream& out, int32 val) {
-  out.put(val);
-  out.put(val >> 8);
-  out.put(val >> 16);
-  out.put(val >> 24);
+void writeInt32(ostream& out, int32 val) {
+  writeUint32(out, uint32(val));
 }
 
-void read(istream& in, uint64& val) {
-  char buf[8];
-  in.read(&buf[0], 8);
-  val = (uint64(buf[7]) << 56) | (uint64(buf[6]) << 48) | (uint64(buf[5]) << 40) | (uint64(buf[4]) << 32) | (uint64(buf[3]) << 24) | (uint64(buf[2]) << 16) | (uint64(buf[1]) << 8) | buf[0];
+uint64 readUint64(istream& in) {
+  uint32 v1 = readUint32(in);
+  uint32 v2 = readUint32(in);
+  return (uint64(v2) << 32) | v1;
 }
 
-void write(ostream& out, uint64 val) {
-  out.put(val);
-  out.put(val >> 8);
-  out.put(val >> 16);
-  out.put(val >> 24);
-  out.put(val >> 32);
-  out.put(val >> 40);
-  out.put(val >> 48);
-  out.put(val >> 56);
+void writeUint64(ostream& out, uint64 val) {
+  writeUint32(out, uint32(val));
+  writeUint32(out, uint32(val >> 32));
 }
 
-void read(istream& in, int64& val) {
-  char buf[8];
-  in.read(&buf[0], 8);
-  val = (int64(buf[7]) << 56) | (int64(buf[6]) << 48) | (int64(buf[5]) << 40) | (int64(buf[4]) << 32) | (int64(buf[3]) << 24) | (int64(buf[2]) << 16) | (int64(buf[1]) << 8) | buf[0];
+int64 readInt64(istream& in) {
+  uint64 v = readUint64(in);
+  return int64(v);
 }
 
-void write(ostream& out, int64 val) {
-  out.put(val);
-  out.put(val >> 8);
-  out.put(val >> 16);
-  out.put(val >> 24);
-  out.put(val >> 32);
-  out.put(val >> 40);
-  out.put(val >> 48);
-  out.put(val >> 56);
+void writeInt64(ostream& out, int64 val) {
+  writeUint64(out, uint64(val));
 }
 
-void read(istream& in, char* val, uint32 length) {
-  char* buf = new char[length];
-  in.read(buf, length);
-  memcpy(val, buf, length);
-  delete[] buf;
+void readUint8Array(istream& in, uint8* val, uint32 length) {
+  for (uint32 i = 0; i < length; i++) {
+    *val = readUint8(in);
+    val++;
+  }
 }
 
-void write(ostream& out, char* val, uint32 length) {
-  out.write(val, length);
+void writeUint8Array(ostream& out, uint8* val, uint32 length) {
+  for (uint32 i = 0; i < length; i++) {
+    writeUint8(out, *val);
+    val++;
+  }
 }
+
+void readUint32Array(istream& in, uint32* val, uint32 length) {
+  for (uint32 i = 0; i < length; i++) {
+    *val = readUint32(in);
+    val++;
+  }
+}
+
+void writeUint32Array(ostream& out, uint32* val, uint32 length) {
+  for (uint32 i = 0; i < length; i++) {
+    writeUint32(out, *val);
+    val++;
+  }
+}
+
+void readInt32Array(istream& in, int32* val, uint32 length) {
+  for (uint32 i = 0; i < length; i++) {
+    *val = readInt32(in);
+    val++;
+  }
+}
+
+void writeInt32Array(ostream& out, int32* val, uint32 length) {
+  for (uint32 i = 0; i < length; i++) {
+    writeInt32(out, *val);
+    val++;
+  }
+}
+
 
 }  // namespace utils
 

@@ -14,9 +14,10 @@ namespace nes {
 
 class Console;
 
-class Pulse {
+// State that gets persisted when creating a save state.
+class PulseState {
   public:
-    Pulse() :
+    PulseState() :
         enabled(false),
         channel(0),
         lengthEnabled(false),
@@ -63,6 +64,13 @@ class Pulse {
 
     void Save(ostream& out);
     void Load(istream& in);
+};
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class Pulse : public PulseState {
+  public:
+    Pulse() : PulseState() {};
+
     void writeControl(uint8 value);
     void writeSweep(uint8 value);
     void writeTimerLow(uint8 value);
@@ -75,9 +83,10 @@ class Pulse {
     uint8 output();
 };
 
-class Triangle {
+// State that gets persisted when creating a save state.
+class TriangleState {
   public:
-    Triangle() :
+    TriangleState() :
         enabled(false),
         lengthEnabled(false),
         lengthValue(0),
@@ -100,6 +109,13 @@ class Triangle {
 
     void Save(ostream& out);
     void Load(istream& in);
+};
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class Triangle : public TriangleState {
+  public:
+    Triangle() : TriangleState() {};
+
     void writeControl(uint8 value);
     void writeTimerLow(uint8 value);
     void writeTimerHigh(uint8 value);
@@ -109,9 +125,10 @@ class Triangle {
     uint8 output();
 };
 
-class Noise {
+// State that gets persisted when creating a save state.
+class NoiseState {
   public:
-    Noise() :
+    NoiseState() :
         enabled(false),
         mode(false),
         shiftRegister(0),
@@ -144,6 +161,13 @@ class Noise {
 
     void Save(ostream& out);
     void Load(istream& in);
+};
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class Noise : public NoiseState {
+  public:
+    Noise() : NoiseState() {};
+
     void writeControl(uint8 value);
     void writePeriod(uint8 value);
     void writeLength(uint8 value);
@@ -153,10 +177,10 @@ class Noise {
     uint8 output();
 };
 
-class DMC {
+// State that gets persisted when creating a save state.
+class DMCState {
   public:
-    DMC(CPU* cpu) :
-        cpu(cpu),
+    DMCState() :
         enabled(false),
         value(0),
         sampleAddress(0),
@@ -170,7 +194,6 @@ class DMC {
         loop(false),
         irq(false) {};
 
-    CPU* cpu;
     bool enabled;
     uint8 value;
     uint16 sampleAddress;
@@ -186,6 +209,17 @@ class DMC {
 
     void Save(ostream& out);
     void Load(istream& in);
+};
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class DMC : public DMCState {
+  public:
+    DMC(CPU* cpu) :
+        DMCState(),
+        cpu(cpu) {};
+
+    CPU* cpu;
+
     void writeControl(uint8 value);
     void writeValue(uint8 value);
     void writeAddress(uint8 value);
@@ -197,17 +231,38 @@ class DMC {
     uint8 output();
 };
 
-class APU {
+// State that gets persisted when creating a save state.
+class APUState {
   public:
-    APU(Console* console, CPU* cpu) :
-        console(console),
-        // channel(0),
-        sampleRate(numeric_limits<float64>::infinity()),
-        dmc(cpu),
+    APUState() :
         cycle(0),
         framePeriod(0),
         frameValue(0),
         frameIRQ(false) {};
+
+    uint64 cycle;
+    uint8 framePeriod;
+    uint8 frameValue;
+    bool frameIRQ;
+
+    void Save(ostream& out);
+    void Load(istream& in);
+};
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class APU : public APUState {
+  public:
+    APU(Console* console, CPU* cpu) :
+        APUState(),
+        console(console),
+        // channel(0),
+        sampleRate(numeric_limits<float64>::infinity()),
+        pulse1(),
+        pulse2(),
+        triangle(),
+        noise(),
+        dmc(cpu),
+        filterChain() {};
     ~APU() {
       // delete channel;
       // channel = 0;
@@ -223,14 +278,8 @@ class APU {
     Triangle triangle;
     Noise noise;
     DMC dmc;
-    uint64 cycle;
-    uint8 framePeriod;
-    uint8 frameValue;
-    bool frameIRQ;
     FilterChain filterChain;
 
-    void Save(ostream& out);
-    void Load(istream& in);
     void Step();
     void SetSampleRate(float64 rate);
     void sendSample();

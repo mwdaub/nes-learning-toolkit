@@ -261,42 +261,42 @@ void (*table[256]) (CPU*, StepInfo*) = {
   sed, sbc, nop, isc, nop, sbc, inc, isc
 };
 
-void CPU::Save(ostream& out) {
-  utils::write(out, cycles);
-  utils::write(out, PC);
-  utils::write(out, SP);
-  utils::write(out, A);
-  utils::write(out, X);
-  utils::write(out, Y);
-  utils::write(out, C);
-  utils::write(out, Z);
-  utils::write(out, I);
-  utils::write(out, D);
-  utils::write(out, B);
-  utils::write(out, U);
-  utils::write(out, V);
-  utils::write(out, N);
-  utils::write(out, interrupt);
-  utils::write(out, stall);
+void CPUState::Save(ostream& out) {
+  utils::writeUint64(out, cycles);
+  utils::writeUint16(out, PC);
+  utils::writeUint8(out, SP);
+  utils::writeUint8(out, A);
+  utils::writeUint8(out, X);
+  utils::writeUint8(out, Y);
+  utils::writeUint8(out, C);
+  utils::writeUint8(out, Z);
+  utils::writeUint8(out, I);
+  utils::writeUint8(out, D);
+  utils::writeUint8(out, B);
+  utils::writeUint8(out, U);
+  utils::writeUint8(out, V);
+  utils::writeUint8(out, N);
+  utils::writeUint8(out, interrupt);
+  utils::writeInt32(out, stall);
 }
 
-void CPU::Load(istream& in) {
-  utils::read(in, cycles);
-  utils::read(in, PC);
-  utils::read(in, SP);
-  utils::read(in, A);
-  utils::read(in, X);
-  utils::read(in, Y);
-  utils::read(in, C);
-  utils::read(in, Z);
-  utils::read(in, I);
-  utils::read(in, D);
-  utils::read(in, B);
-  utils::read(in, U);
-  utils::read(in, V);
-  utils::read(in, N);
-  utils::read(in, interrupt);
-  utils::read(in, stall);
+void CPUState::Load(istream& in) {
+  cycles = utils::readUint64(in);
+  PC = utils::readUint16(in);
+  SP = utils::readUint8(in);
+  A = utils::readUint8(in);
+  X = utils::readUint8(in);
+  Y = utils::readUint8(in);
+  C = utils::readUint8(in);
+  Z = utils::readUint8(in);
+  I = utils::readUint8(in);
+  D = utils::readUint8(in);
+  B = utils::readUint8(in);
+  U = utils::readUint8(in);
+  V = utils::readUint8(in);
+  N = utils::readUint8(in);
+  interrupt = utils::readUint8(in);
+  stall = utils::readInt32(in);
 }
 
 uint8 CPU::Read(uint16 address) {

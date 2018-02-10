@@ -4,16 +4,18 @@
 
 #include "utils.h"
 
+using namespace nes;
+
 namespace nes {
 
-void Cartridge::Save(ostream& out) {
-  utils::write(out, reinterpret_cast<char*>(&SRAM[0]), sizeof(SRAM));
-  utils::write(out, mirror);
+void CartridgeState::Save(ostream& out) {
+  utils::writeUint8Array(out, &SRAM[0], kSRAMSize);
+  utils::writeUint8(out, mirror);
 }
 
-void Cartridge::Load(istream& in) {
-  utils::read(in, reinterpret_cast<char*>(&SRAM[0]), sizeof(SRAM));
-  utils::read(in, mirror);
+void CartridgeState::Load(istream& in) {
+  utils::readUint8Array(in, &SRAM[0], kSRAMSize);
+  mirror = utils::readUint8(in);
 }
 
 }  // namespace nes

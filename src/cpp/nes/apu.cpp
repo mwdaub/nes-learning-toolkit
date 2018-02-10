@@ -270,28 +270,18 @@ float32 tndTable[203] = {
   163.67f / (24329.0f/float32(202) + 100)
 };
 
-void APU::Save(ostream& out) {
-  utils::write(out, cycle);
-  utils::write(out, framePeriod);
-  utils::write(out, frameValue);
-  utils::write(out, frameIRQ);
-  pulse1.Save(out);
-  pulse2.Save(out);
-  triangle.Save(out);
-  noise.Save(out);
-  dmc.Save(out);
+void APUState::Save(ostream& out) {
+  utils::writeUint64(out, cycle);
+  utils::writeUint8(out, framePeriod);
+  utils::writeUint8(out, frameValue);
+  utils::writeBool(out, frameIRQ);
 }
 
-void APU::Load(istream& in) {
-  utils::read(in, cycle);
-  utils::read(in, framePeriod);
-  utils::read(in, frameValue);
-  utils::read(in, frameIRQ);
-  pulse1.Load(in);
-  pulse2.Load(in);
-  triangle.Load(in);
-  noise.Load(in);
-  dmc.Load(in);
+void APUState::Load(istream& in) {
+  cycle = utils::readUint64(in);
+  framePeriod = utils::readUint8(in);
+  frameValue = utils::readUint8(in);
+  frameIRQ = utils::readBool(in);
 }
 
 void APU::Step() {
@@ -562,52 +552,52 @@ void APU::writeFrameCounter(uint8 value) {
 
 // Pulse;
 
-void Pulse::Save(ostream& out) {
-  utils::write(out, enabled);
-  utils::write(out, channel);
-  utils::write(out, lengthEnabled);
-  utils::write(out, lengthValue);
-  utils::write(out, timerPeriod);
-  utils::write(out, timerValue);
-  utils::write(out, dutyMode);
-  utils::write(out, dutyValue);
-  utils::write(out, sweepReload);
-  utils::write(out, sweepEnabled);
-  utils::write(out, sweepNegate);
-  utils::write(out, sweepShift);
-  utils::write(out, sweepPeriod);
-  utils::write(out, sweepValue);
-  utils::write(out, envelopeEnabled);
-  utils::write(out, envelopeLoop);
-  utils::write(out, envelopeStart);
-  utils::write(out, envelopePeriod);
-  utils::write(out, envelopeValue);
-  utils::write(out, envelopeVolume);
-  utils::write(out, constantVolume);
+void PulseState::Save(ostream& out) {
+  utils::writeBool(out, enabled);
+  utils::writeUint8(out, channel);
+  utils::writeBool(out, lengthEnabled);
+  utils::writeUint8(out, lengthValue);
+  utils::writeUint16(out, timerPeriod);
+  utils::writeUint16(out, timerValue);
+  utils::writeUint8(out, dutyMode);
+  utils::writeUint8(out, dutyValue);
+  utils::writeBool(out, sweepReload);
+  utils::writeBool(out, sweepEnabled);
+  utils::writeBool(out, sweepNegate);
+  utils::writeUint8(out, sweepShift);
+  utils::writeUint8(out, sweepPeriod);
+  utils::writeUint8(out, sweepValue);
+  utils::writeBool(out, envelopeEnabled);
+  utils::writeBool(out, envelopeLoop);
+  utils::writeBool(out, envelopeStart);
+  utils::writeUint8(out, envelopePeriod);
+  utils::writeUint8(out, envelopeValue);
+  utils::writeUint8(out, envelopeVolume);
+  utils::writeUint8(out, constantVolume);
 }
 
-void Pulse::Load(istream& in) {
-  utils::read(in, enabled);
-  utils::read(in, channel);
-  utils::read(in, lengthEnabled);
-  utils::read(in, lengthValue);
-  utils::read(in, timerPeriod);
-  utils::read(in, timerValue);
-  utils::read(in, dutyMode);
-  utils::read(in, dutyValue);
-  utils::read(in, sweepReload);
-  utils::read(in, sweepEnabled);
-  utils::read(in, sweepNegate);
-  utils::read(in, sweepShift);
-  utils::read(in, sweepPeriod);
-  utils::read(in, sweepValue);
-  utils::read(in, envelopeEnabled);
-  utils::read(in, envelopeLoop);
-  utils::read(in, envelopeStart);
-  utils::read(in, envelopePeriod);
-  utils::read(in, envelopeValue);
-  utils::read(in, envelopeVolume);
-  utils::read(in, constantVolume);
+void PulseState::Load(istream& in) {
+  enabled = utils::readBool(in);
+  channel = utils::readUint8(in);
+  lengthEnabled = utils::readBool(in);
+  lengthValue = utils::readUint8(in);
+  timerPeriod = utils::readUint16(in);
+  timerValue = utils::readUint16(in);
+  dutyMode = utils::readUint8(in);
+  dutyValue = utils::readUint8(in);
+  sweepReload = utils::readBool(in);
+  sweepEnabled = utils::readBool(in);
+  sweepNegate = utils::readBool(in);
+  sweepShift = utils::readUint8(in);
+  sweepPeriod = utils::readUint8(in);
+  sweepValue = utils::readUint8(in);
+  envelopeEnabled = utils::readBool(in);
+  envelopeLoop = utils::readBool(in);
+  envelopeStart = utils::readBool(in);
+  envelopePeriod = utils::readUint8(in);
+  envelopeValue = utils::readUint8(in);
+  envelopeVolume = utils::readUint8(in);
+  constantVolume = utils::readUint8(in);
 }
 
 void Pulse::writeControl(uint8 value) {
@@ -725,28 +715,28 @@ uint8 Pulse::output() {
 
 // Triangle;
 
-void Triangle::Save(ostream& out) {
-  utils::write(out, enabled);
-  utils::write(out, lengthEnabled);
-  utils::write(out, lengthValue);
-  utils::write(out, timerPeriod);
-  utils::write(out, timerValue);
-  utils::write(out, dutyValue);
-  utils::write(out, counterPeriod);
-  utils::write(out, counterValue);
-  utils::write(out, counterReload);
+void TriangleState::Save(ostream& out) {
+  utils::writeBool(out, enabled);
+  utils::writeBool(out, lengthEnabled);
+  utils::writeUint8(out, lengthValue);
+  utils::writeUint16(out, timerPeriod);
+  utils::writeUint16(out, timerValue);
+  utils::writeUint8(out, dutyValue);
+  utils::writeUint8(out, counterPeriod);
+  utils::writeUint8(out, counterValue);
+  utils::writeBool(out, counterReload);
 }
 
-void Triangle::Load(istream& in) {
-  utils::read(in, enabled);
-  utils::read(in, lengthEnabled);
-  utils::read(in, lengthValue);
-  utils::read(in, timerPeriod);
-  utils::read(in, timerValue);
-  utils::read(in, dutyValue);
-  utils::read(in, counterPeriod);
-  utils::read(in, counterValue);
-  utils::read(in, counterReload);
+void TriangleState::Load(istream& in) {
+  enabled = utils::readBool(in);
+  lengthEnabled = utils::readBool(in);
+  lengthValue = utils::readUint8(in);
+  timerPeriod = utils::readUint16(in);
+  timerValue = utils::readUint16(in);
+  dutyValue = utils::readUint8(in);
+  counterPeriod = utils::readUint8(in);
+  counterValue = utils::readUint8(in);
+  counterReload = utils::readBool(in);
 }
 
 void Triangle::writeControl(uint8 value) {
@@ -808,38 +798,38 @@ uint8 Triangle::output() {
 
 // Noise;
 
-void Noise::Save(ostream& out) {
-  utils::write(out, enabled);
-  utils::write(out, mode);
-  utils::write(out, shiftRegister);
-  utils::write(out, lengthEnabled);
-  utils::write(out, lengthValue);
-  utils::write(out, timerPeriod);
-  utils::write(out, timerValue);
-  utils::write(out, envelopeEnabled);
-  utils::write(out, envelopeLoop);
-  utils::write(out, envelopeStart);
-  utils::write(out, envelopePeriod);
-  utils::write(out, envelopeValue);
-  utils::write(out, envelopeVolume);
-  utils::write(out, constantVolume);
+void NoiseState::Save(ostream& out) {
+  utils::writeBool(out, enabled);
+  utils::writeBool(out, mode);
+  utils::writeUint16(out, shiftRegister);
+  utils::writeBool(out, lengthEnabled);
+  utils::writeUint8(out, lengthValue);
+  utils::writeUint16(out, timerPeriod);
+  utils::writeUint16(out, timerValue);
+  utils::writeBool(out, envelopeEnabled);
+  utils::writeBool(out, envelopeLoop);
+  utils::writeBool(out, envelopeStart);
+  utils::writeUint8(out, envelopePeriod);
+  utils::writeUint8(out, envelopeValue);
+  utils::writeUint8(out, envelopeVolume);
+  utils::writeUint8(out, constantVolume);
 }
 
-void Noise::Load(istream& in) {
-  utils::read(in, enabled);
-  utils::read(in, mode);
-  utils::read(in, shiftRegister);
-  utils::read(in, lengthEnabled);
-  utils::read(in, lengthValue);
-  utils::read(in, timerPeriod);
-  utils::read(in, timerValue);
-  utils::read(in, envelopeEnabled);
-  utils::read(in, envelopeLoop);
-  utils::read(in, envelopeStart);
-  utils::read(in, envelopePeriod);
-  utils::read(in, envelopeValue);
-  utils::read(in, envelopeVolume);
-  utils::read(in, constantVolume);
+void NoiseState::Load(istream& in) {
+  enabled = utils::readBool(in);
+  mode = utils::readBool(in);
+  shiftRegister = utils::readUint16(in);
+  lengthEnabled = utils::readBool(in);
+  lengthValue = utils::readUint8(in);
+  timerPeriod = utils::readUint16(in);
+  timerValue = utils::readUint16(in);
+  envelopeEnabled = utils::readBool(in);
+  envelopeLoop = utils::readBool(in);
+  envelopeStart = utils::readBool(in);
+  envelopePeriod = utils::readUint8(in);
+  envelopeValue = utils::readUint8(in);
+  envelopeVolume = utils::readUint8(in);
+  constantVolume = utils::readUint8(in);
 }
 
 void Noise::writeControl(uint8 value) {
@@ -921,34 +911,34 @@ uint8 Noise::output() {
 
 // DMC;
 
-void DMC::Save(ostream& out) {
-  utils::write(out, enabled);
-  utils::write(out, value);
-  utils::write(out, sampleAddress);
-  utils::write(out, sampleLength);
-  utils::write(out, currentAddress);
-  utils::write(out, currentLength);
-  utils::write(out, shiftRegister);
-  utils::write(out, bitCount);
-  utils::write(out, tickPeriod);
-  utils::write(out, tickValue);
-  utils::write(out, loop);
-  utils::write(out, irq);
+void DMCState::Save(ostream& out) {
+  utils::writeBool(out, enabled);
+  utils::writeUint8(out, value);
+  utils::writeUint16(out, sampleAddress);
+  utils::writeUint16(out, sampleLength);
+  utils::writeUint16(out, currentAddress);
+  utils::writeUint16(out, currentLength);
+  utils::writeUint8(out, shiftRegister);
+  utils::writeUint8(out, bitCount);
+  utils::writeUint8(out, tickPeriod);
+  utils::writeUint8(out, tickValue);
+  utils::writeBool(out, loop);
+  utils::writeBool(out, irq);
 }
 
-void DMC::Load(istream& in) {
-  utils::read(in, enabled);
-  utils::read(in, value);
-  utils::read(in, sampleAddress);
-  utils::read(in, sampleLength);
-  utils::read(in, currentAddress);
-  utils::read(in, currentLength);
-  utils::read(in, shiftRegister);
-  utils::read(in, bitCount);
-  utils::read(in, tickPeriod);
-  utils::read(in, tickValue);
-  utils::read(in, loop);
-  utils::read(in, irq);
+void DMCState::Load(istream& in) {
+  enabled = utils::readBool(in);
+  value = utils::readUint8(in);
+  sampleAddress = utils::readUint16(in);
+  sampleLength = utils::readUint16(in);
+  currentAddress = utils::readUint16(in);
+  currentLength = utils::readUint16(in);
+  shiftRegister = utils::readUint8(in);
+  bitCount = utils::readUint8(in);
+  tickPeriod = utils::readUint8(in);
+  tickValue = utils::readUint8(in);
+  loop = utils::readBool(in);
+  irq = utils::readBool(in);
 }
 
 void DMC::writeControl(uint8 value) {

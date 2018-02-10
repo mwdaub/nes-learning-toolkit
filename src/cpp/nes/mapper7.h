@@ -7,21 +7,32 @@
 
 namespace nes {
 
-class Mapper7 : public Mapper {
+// State that gets persisted when creating a save state.
+class Mapper7State : virtual public MapperState {
+  public:
+    Mapper7State() :
+        prgBank(0) {};
+
+    int32 prgBank;
+
+    virtual void Save(ostream& out) override;
+    virtual void Load(istream& in) override;
+};
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class Mapper7 : virtual public Mapper, public Mapper7State {
   public:
     Mapper7(Cartridge* cartridge) :
-        cartridge(cartridge),
-        prgBank(0) {};
+        Mapper7State(),
+        cartridge(cartridge) {};
     virtual ~Mapper7() {};
 
     Cartridge* cartridge;
-    int32 prgBank;
 
     virtual uint8 Read(uint16 address) override;
     virtual void Write(uint16 address, uint8 value) override;
     virtual void Step() override {};
-    virtual void Save(ostream& out) override;
-    virtual void Load(istream& in) override;
+    virtual MapperState* Copy() override { return new Mapper7State(*this); };
 };
 
 }  // namespace nes

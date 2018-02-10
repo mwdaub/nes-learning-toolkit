@@ -22,20 +22,14 @@ Cartridge* LoadiNESFile(string path) {
   fs.open(path.c_str(), fstream::in);
 
   // read file header
-  uint32 magic;
-  uint8 numPRG;
-  uint8 numCHR;
-  uint8 control1;
-  uint8 control2;
-  uint8 numRAM;
+  uint32 magic = utils::readUint32(fs);
+  uint8 numPRG = utils::readUint8(fs);
+  uint8 numCHR = utils::readUint8(fs);
+  uint8 control1 = utils::readUint8(fs);
+  uint8 control2 = utils::readUint8(fs);
+  uint8 numRAM = utils::readUint8(fs);
   uint8 padding[7];
-  utils::read(fs, magic);
-  utils::read(fs, numPRG);
-  utils::read(fs, numCHR);
-  utils::read(fs, control1);
-  utils::read(fs, control2);
-  utils::read(fs, numRAM);
-  utils::read(fs, reinterpret_cast<char*>(&padding[0]), sizeof(padding));
+  utils::readUint8Array(fs, &padding[0], 7);
   if (magic != iNESFileMagic) {
     return NULL;
   }
@@ -62,7 +56,7 @@ Cartridge* LoadiNESFile(string path) {
   // read prg-rom bank(s)
   uint32 prgLength = numPRG*16384;
   uint8* prg = new uint8[prgLength];
-  utils::read(fs, reinterpret_cast<char*>(prg), prgLength);
+  utils::readUint8Array(fs, &prg[0], prgLength);
 
   // read chr-rom bank(s)
   uint32 chrLength;
@@ -74,7 +68,7 @@ Cartridge* LoadiNESFile(string path) {
   } else {
     chrLength = numCHR*8192;
     chr = new uint8[chrLength];
-    utils::read(fs, reinterpret_cast<char*>(chr), chrLength);
+    utils::readUint8Array(fs, &chr[0], chrLength);
   }
 
   if (fs.fail()) {

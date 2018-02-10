@@ -11,17 +11,23 @@ namespace nes {
 
 class Console;
 
-class Mapper {
+class MapperState {
+  public:
+    virtual void Save(ostream& out) = 0;
+    virtual void Load(istream& in) = 0;
+};
+
+class Mapper : virtual public MapperState {
   public:
     virtual ~Mapper() {};
 
+    virtual void Step() = 0;
     virtual uint8 Read(uint16 address) = 0;
     virtual void Write(uint16 address, uint8 value) = 0;
-    virtual void Step() = 0;
-    virtual void Save(ostream& out) = 0;
-    virtual void Load(istream& in) = 0;
+    virtual MapperState* Copy() = 0;
 
-    static Mapper* create(Console* console);
+    static Mapper* Create(Console* console);
+    static MapperState* Copy(Mapper* mapper);
 };
 
 }  // namespace nes

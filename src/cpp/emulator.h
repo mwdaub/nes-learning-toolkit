@@ -155,6 +155,19 @@ static PyObject * Emulator_read_memory(Emulator* self, PyObject *args) {
   return Py_BuildValue("B", memValue);
 }
 
+// Start a new session for recording controller input.
+static PyObject * Emulator_new_session(Emulator* self, PyObject *args) {
+  // parse arguments
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  self->console->NewSession();
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 static PyMethodDef Emulator_methods[] = {
   { "save_state", (PyCFunction)Emulator_save_state, METH_VARARGS, "Save NES savestate." },
   { "load_state", (PyCFunction)Emulator_load_state, METH_VARARGS, "Load NES savestate." },
@@ -163,6 +176,7 @@ static PyMethodDef Emulator_methods[] = {
   { "emulate", (PyCFunction)Emulator_emulate, METH_KEYWORDS, "Emulate the number of specified frames." },
   { "get_pixels", (PyCFunction)Emulator_get_pixels, METH_VARARGS, "Get an array containing the current RGB pixel values." },
   { "read_memory", (PyCFunction)Emulator_read_memory, METH_VARARGS, "Read the value at the given memory address." },
+  { "new_session", (PyCFunction)Emulator_new_session, METH_VARARGS, "Start a new recording session." },
   {NULL}  /* Sentinel */
 };
 

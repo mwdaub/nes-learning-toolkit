@@ -10,17 +10,33 @@
 #include "cartridge.h"
 #include "controller.h"
 #include "mapper.h"
+#include "session.h"
 
 using namespace std;
 
 namespace nes {
 
-class Console {
+// State that gets persisted when creating a save state.
+class ConsoleState {
+  public:
+    ConsoleState() : RAM{} {};
+
+    static constexpr uint32 kRAMSize = 2048;
+
+    uint8 RAM[kRAMSize];
+
+    void Save(ostream& out);
+    void Load(istream& in);
+};
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class Console : public ConsoleState {
   public:
     Console(Cartridge* cartridge) :
         cartridge(cartridge),
-        RAM{} {
-      mapper = Mapper::create(this);
+        state(),
+        session(NULL) {
+      mapper = Mapper::Create(this);
       controller1 = new Controller();
       controller2 = new Controller();
       cpu = new CPU(this);
@@ -43,7 +59,8 @@ class Console {
       controller2 = NULL;
       delete mapper;
       mapper = NULL;
-    }
+      CloseSession();
+    };
 
     CPU* cpu;
     APU* apu;
@@ -52,12 +69,14 @@ class Console {
     Controller* controller1;
     Controller* controller2;
     Mapper* mapper;
-    uint8 RAM[2048];
+    ConsoleState state;
+    Session* session;
 
+    uint32 Size();
     void Reset();
     int Step();
     int StepFrame();
-    void StepSeconds(float64 seconds);
+    void Execute(InputSequence* seq);
     Screen* Buffer();
     RGBA* BackgroundColor();
     void SetButtons1(uint8 buttons);
@@ -68,6 +87,8 @@ class Console {
     void SaveState(ostream& out);
     void LoadState(string filename);
     void LoadState(istream& in);
+    void NewSession();
+    void CloseSession();
 };
 
 }  // namespace nes

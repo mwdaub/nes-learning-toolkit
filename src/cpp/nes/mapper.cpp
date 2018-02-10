@@ -10,7 +10,7 @@
 
 namespace nes {
 
-Mapper* Mapper::create(Console* console) {
+Mapper* Mapper::Create(Console* console) {
   Cartridge* cartridge = console->cartridge;
   switch (cartridge->mapper) {
   case 0:
@@ -29,6 +29,13 @@ Mapper* Mapper::create(Console* console) {
     return new Mapper225(cartridge);
   }
   return 0;
+}
+
+MapperState* Mapper::Copy(Mapper* mapper) {
+  if (mapper) {
+    return mapper->Copy();
+  }
+  return NULL;
 }
 
 }  // namespace nes

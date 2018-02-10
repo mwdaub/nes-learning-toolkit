@@ -21,12 +21,10 @@ struct StepInfo {
       mode(mode) {};
 };
 
-class Console;
-
-class CPU {
+// State that gets persisted when creating a save state.
+class CPUState {
   public:
-    CPU(Console* console) :
-        console(console),
+    CPUState() :
         cycles(0),
         PC(0),
         SP(0),
@@ -42,13 +40,8 @@ class CPU {
         V(0),
         N(0),
         interrupt(0),
-        stall(0) {
-      Reset();
-    };
+        stall(0) {};
 
-    static const int32 Frequency = 1789773;
-
-    Console* console;
     uint64 cycles;   // number of cycles
     uint16 PC;       // program counter
     uint8 SP;        // stack pointer
@@ -68,6 +61,23 @@ class CPU {
 
     void Save(ostream& out);
     void Load(istream& in);
+};
+
+class Console;
+
+// Using inheritence to be consistent with PPU. Maybe refactor someday...
+class CPU : public CPUState {
+  public:
+    CPU(Console* console) :
+        CPUState(),
+        console(console) {
+      Reset();
+    };
+
+    static const int32 Frequency = 1789773;
+
+    Console* console;
+
     uint8 Read(uint16 address);
     void Write(uint16 address, uint8 value);
     int32 Step();

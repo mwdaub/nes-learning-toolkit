@@ -28,17 +28,13 @@ class Screen {
       pixels[i+2] = rgba->B;
       pixels[i+3] = rgba->A;
     };
-
-    void Save(ostream& out) {
-      cout << "Writing " << sizeof(pixels) << "..." << endl;
-      utils::write(out, reinterpret_cast<char*>(&pixels[0]), sizeof(pixels));
-    }
 };
 
-class PPU {
-  public:
-    PPU(Console* console) :
-        console(console),
+// I know, I know...I should be using composition over inheritence,
+// but refactoring the existing code would be a pain.
+class PPUState {
+public:
+    PPUState() :
         cycle(0),
         scanline(0),
         frame(0),
@@ -82,31 +78,24 @@ class PPU {
         flagSpriteZeroHit(0),
         flagSpriteOverflow(0),
         oamAddress(0),
-        bufferedData(0) {
-      front = new Screen();
-      back = new Screen();
-      Reset();
-    };
+        bufferedData(0) {};
 
-    ~PPU() {
-      delete front;
-      front = NULL;
-      delete back;
-      back = NULL;
-    }
-
-    Console* console; // parent Console
+    static constexpr uint32 kPaletteDataSize = 32;
+    static constexpr uint32 kNameTableDataSize = 2048;
+    static constexpr uint32 kOamDataSize = 256;
+    static constexpr uint32 kSpritePatternsSize = 8;
+    static constexpr uint32 kSpritePositionsSize = 8;
+    static constexpr uint32 kSpritePrioritiesSize = 8;
+    static constexpr uint32 kSpriteIndexesSize = 8;
 
     int32 cycle;    // 0-340
     int32 scanline; // 0-261, 0-239=visible, 240=post, 241-260=vblank, 261=pre
     uint64 frame;   // frame counter
 
     // storage variables
-    uint8 paletteData[32];
-    uint8 nameTableData[2048];
-    uint8 oamData[256];
-    Screen* front;
-    Screen* back;
+    uint8 paletteData[kPaletteDataSize];
+    uint8 nameTableData[kNameTableDataSize];
+    uint8 oamData[kOamDataSize];
 
     // PPU registers
     uint16 v; // current vram address (15 bit)
@@ -131,11 +120,11 @@ class PPU {
     uint64 tileData;
 
     // sprite temporary variables
-    int spriteCount;
-    uint32 spritePatterns[8];
-    uint8 spritePositions[8];
-    uint8 spritePriorities[8];
-    uint8 spriteIndexes[8];
+    int32 spriteCount;
+    uint32 spritePatterns[kSpritePatternsSize];
+    uint8 spritePositions[kSpritePositionsSize];
+    uint8 spritePriorities[kSpritePrioritiesSize];
+    uint8 spriteIndexes[kSpriteIndexesSize];
 
     // $2000 PPUCTRL
     uint8 flagNameTable;       // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
@@ -167,6 +156,29 @@ class PPU {
 
     void Save(ostream& out);
     void Load(istream& in);
+};
+
+class PPU : public PPUState {
+  public:
+    PPU(Console* console) :
+        PPUState(),
+        console(console) {
+      front = new Screen();
+      back = new Screen();
+      Reset();
+    };
+
+    ~PPU() {
+      delete front;
+      front = NULL;
+      delete back;
+      back = NULL;
+    }
+
+    Console* console; // parent Console
+    Screen* front;
+    Screen* back;
+
     uint8 Read(uint16 address);
     void Write(uint16 address, uint8 val);
     void Reset();

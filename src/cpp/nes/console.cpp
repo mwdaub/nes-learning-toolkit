@@ -6,8 +6,17 @@
 
 namespace nes {
 
+void ConsoleState::Save(ostream& out) {
+  utils::writeUint8Array(out, &RAM[0], kRAMSize);
+}
+
+void ConsoleState::Load(istream& in) {
+  utils::readUint8Array(in, &RAM[0], kRAMSize);
+}
+
 void Console::Reset() {
   cpu->Reset();
+  CloseSession();
 }
 
 int Console::Step() {
@@ -24,6 +33,9 @@ int Console::Step() {
 }
 
 int Console::StepFrame() {
+  if (session) {
+    session->RecordFrame();
+  }
   int32 cpuCycles = 0;
   uint64 frame = ppu->frame;
   while (frame == ppu->frame) {
@@ -32,10 +44,10 @@ int Console::StepFrame() {
   return cpuCycles;
 }
 
-void Console::StepSeconds(float64 seconds) {
-  int32 cycles = int(CPU::Frequency * seconds);
-  while (cycles > 0) {
-    cycles -= Step();
+void Console::Execute(InputSequence* input) {
+  for (auto it = input->inputs.begin(); it != input->inputs.end(); it++) {
+    SetButtons1(*it);
+    StepFrame();
   }
 }
 
@@ -72,9 +84,14 @@ void Console::SaveState(string filename) {
 }
 
 void Console::SaveState(ostream& out) {
-  utils::write(out, reinterpret_cast<char*>(&RAM[0]), sizeof(RAM));
+  this->Save(out);
   cpu->Save(out);
   apu->Save(out);
+  apu->pulse1.Save(out);
+  apu->pulse2.Save(out);
+  apu->triangle.Save(out);
+  apu->noise.Save(out);
+  apu->dmc.Save(out);
   ppu->Save(out);
   cartridge->Save(out);
   mapper->Save(out);
@@ -88,12 +105,29 @@ void Console::LoadState(string filename) {
 }
 
 void Console::LoadState(istream& in) {
-  utils::read(in, reinterpret_cast<char*>(&RAM[0]), sizeof(RAM));
+  this->Load(in);
   cpu->Load(in);
   apu->Load(in);
+  apu->pulse1.Load(in);
+  apu->pulse2.Load(in);
+  apu->triangle.Load(in);
+  apu->noise.Load(in);
+  apu->dmc.Load(in);
   ppu->Load(in);
   cartridge->Load(in);
   mapper->Load(in);
+}
+
+void Console::NewSession() {
+  delete session;
+  session = new Session(this);
+}
+
+void Console::CloseSession() {
+  if (session) {
+    delete session;
+    session = NULL;
+  }
 }
 
 }  // namespace nes;

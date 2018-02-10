@@ -1,6 +1,8 @@
 #ifndef NES_TYPES_H
 #define NES_TYPES_H
 
+#include <cstddef>
+
 namespace nes {
 
 typedef unsigned char uint8;

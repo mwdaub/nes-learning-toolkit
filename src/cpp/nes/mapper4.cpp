@@ -6,28 +6,28 @@
 
 namespace nes {
 
-void Mapper4::Save(ostream& out) {
-  utils::write(out, reg);
-  utils::write(out, reinterpret_cast<char*>(&registers[0]), sizeof(registers));
-  utils::write(out, prgMode);
-  utils::write(out, chrMode);
-  utils::write(out, reinterpret_cast<char*>(&prgOffsets[0]), sizeof(prgOffsets));
-  utils::write(out, reinterpret_cast<char*>(&chrOffsets[0]), sizeof(chrOffsets));
-  utils::write(out, reload);
-  utils::write(out, counter);
-  utils::write(out, irqEnable);
+void Mapper4State::Save(ostream& out) {
+  utils::writeUint8(out, reg);
+  utils::writeUint8Array(out, &registers[0], sizeof(registers));
+  utils::writeUint8(out, prgMode);
+  utils::writeUint8(out, chrMode);
+  utils::writeInt32Array(out, &prgOffsets[0], sizeof(prgOffsets));
+  utils::writeInt32Array(out, &chrOffsets[0], sizeof(chrOffsets));
+  utils::writeUint8(out, reload);
+  utils::writeUint8(out, counter);
+  utils::writeBool(out, irqEnable);
 }
 
-void Mapper4::Load(istream& in) {
-  utils::read(in, reg);
-  utils::read(in, reinterpret_cast<char*>(&registers[0]), sizeof(registers));
-  utils::read(in, prgMode);
-  utils::read(in, chrMode);
-  utils::read(in, reinterpret_cast<char*>(&prgOffsets[0]), sizeof(prgOffsets));
-  utils::read(in, reinterpret_cast<char*>(&chrOffsets[0]), sizeof(chrOffsets));
-  utils::read(in, reload);
-  utils::read(in, counter);
-  utils::read(in, irqEnable);
+void Mapper4State::Load(istream& in) {
+  reg = utils::readUint8(in);
+  utils::readUint8Array(in, &registers[0], kRegistersSize);
+  prgMode = utils::readUint8(in);
+  chrMode = utils::readUint8(in);
+  utils::readInt32Array(in, &prgOffsets[0], kPrgOffsetsSize);
+  utils::readInt32Array(in, &chrOffsets[0], kChrOffsetsSize);
+  reload = utils::readUint8(in);
+  counter = utils::readUint8(in);
+  irqEnable = utils::readBool(in);
 }
 
 void Mapper4::Step() {

@@ -4,16 +4,16 @@
 
 namespace nes {
 
-void Mapper2::Save(ostream& out) {
-  utils::write(out, prgBanks);
-  utils::write(out, prgBank1);
-  utils::write(out, prgBank2);
+void Mapper2State::Save(ostream& out) {
+  utils::writeInt32(out, prgBanks);
+  utils::writeInt32(out, prgBank1);
+  utils::writeInt32(out, prgBank2);
 }
 
-void Mapper2::Load(istream& in) {
-  utils::read(in, prgBanks);
-  utils::read(in, prgBank1);
-  utils::read(in, prgBank2);
+void Mapper2State::Load(istream& in) {
+  prgBanks = utils::readInt32(in);
+  prgBank1 = utils::readInt32(in);
+  prgBank2 = utils::readInt32(in);
 }
 
 uint8 Mapper2::Read(uint16 address) {
