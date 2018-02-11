@@ -112,24 +112,33 @@ static PyObject * Emulator_emulate(Emulator* self, PyObject *args) {
   return Py_None;
 }
 
-static PyObject * Emulator_get_pixels(Emulator* self, PyObject *args) {
+static PyObject * Emulator_get_pixel_indexes(Emulator* self, PyObject *args) {
   // parse arguments
   if (!PyArg_ParseTuple(args, "")) {
     return NULL;
   }
 
-  Screen* screen = self->console->Buffer();
+  // Dimensions of the game pixel indexes.
+  static long int dims[] = {240, 256};
+
+  PyObject* array = PyArray_SimpleNew(3, dims, NPY_UINT8);
+  uint8* data = (uint8*) PyArray_DATA(array);
+  self->console->PixelIndexes(data);
+  return array;
+}
+
+static PyObject * Emulator_get_pixel_values(Emulator* self, PyObject *args) {
+  // parse arguments
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
 
   // Dimensions of the game pixels.
   static long int dims[] = {240, 256, 3};
 
   PyObject* array = PyArray_SimpleNew(3, dims, NPY_UINT8);
   uint8* data = (uint8*) PyArray_DATA(array);
-  for (size_t i = 0; i < 240*256; i++) {
-    data[3*i] = screen->pixels[4*i];
-    data[3*i+1] = screen->pixels[4*i+1];
-    data[3*i+2] = screen->pixels[4*i+2];
-  }
+  self->console->PixelValues(data);
   return array;
 }
 
@@ -174,7 +183,8 @@ static PyMethodDef Emulator_methods[] = {
   { "reset", (PyCFunction)Emulator_reset, METH_VARARGS, "Resets the NES." },
   { "set_input", (PyCFunction)Emulator_set_input, METH_VARARGS, "Set the controller input." },
   { "emulate", (PyCFunction)Emulator_emulate, METH_KEYWORDS, "Emulate the number of specified frames." },
-  { "get_pixels", (PyCFunction)Emulator_get_pixels, METH_VARARGS, "Get an array containing the current RGB pixel values." },
+  { "get_pixel_indexes", (PyCFunction)Emulator_get_pixel_indexes, METH_VARARGS, "Get an array containing the current pixel indexes. Each index is in the range [0..63]" },
+  { "get_pixel_values", (PyCFunction)Emulator_get_pixel_values, METH_VARARGS, "Get an array containing the current RGB pixel values." },
   { "read_memory", (PyCFunction)Emulator_read_memory, METH_VARARGS, "Read the value at the given memory address." },
   { "new_session", (PyCFunction)Emulator_new_session, METH_VARARGS, "Start a new recording session." },
   {NULL}  /* Sentinel */

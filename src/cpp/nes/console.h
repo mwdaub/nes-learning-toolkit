@@ -33,8 +33,8 @@ class ConsoleState {
 class Console : public ConsoleState {
   public:
     Console(Cartridge* cartridge) :
+        ConsoleState(),
         cartridge(cartridge),
-        state(),
         session(NULL) {
       mapper = Mapper::Create(this);
       controller1 = new Controller();
@@ -69,7 +69,6 @@ class Console : public ConsoleState {
     Controller* controller1;
     Controller* controller2;
     Mapper* mapper;
-    ConsoleState state;
     Session* session;
 
     uint32 Size();
@@ -77,8 +76,9 @@ class Console : public ConsoleState {
     int Step();
     int StepFrame();
     void Execute(InputSequence* seq);
-    Screen* Buffer();
-    RGBA* BackgroundColor();
+    void PixelIndexes(uint8* idx);
+    void PixelValues(uint8* vals);
+    const RGB* BackgroundColor();
     void SetButtons1(uint8 buttons);
     void SetButtons2(uint8 buttons);
     void SetAudioChannel();

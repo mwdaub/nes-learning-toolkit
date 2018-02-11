@@ -8,11 +8,11 @@ namespace nes {
 
 void Mapper4State::Save(ostream& out) {
   utils::writeUint8(out, reg);
-  utils::writeUint8Array(out, &registers[0], sizeof(registers));
+  utils::writeUint8Array(out, &registers[0], kRegistersSize);
   utils::writeUint8(out, prgMode);
   utils::writeUint8(out, chrMode);
-  utils::writeInt32Array(out, &prgOffsets[0], sizeof(prgOffsets));
-  utils::writeInt32Array(out, &chrOffsets[0], sizeof(chrOffsets));
+  utils::writeInt32Array(out, &prgOffsets[0], kPrgOffsetsSize);
+  utils::writeInt32Array(out, &chrOffsets[0], kChrOffsetsSize);
   utils::writeUint8(out, reload);
   utils::writeUint8(out, counter);
   utils::writeBool(out, irqEnable);

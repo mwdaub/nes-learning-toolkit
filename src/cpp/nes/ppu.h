@@ -15,21 +15,6 @@ namespace nes {
 
 class Console;
 
-class Screen {
-  public:
-    Screen() : pixels{} {};
-
-    uint8 pixels[4*240*256];
-
-    void SetRGBA(int32 x, int32 y, RGBA* rgba) {
-      int i = (y<<10) + (x<<2);
-      pixels[i] = rgba->R;
-      pixels[i+1] = rgba->G;
-      pixels[i+2] = rgba->B;
-      pixels[i+3] = rgba->A;
-    };
-};
-
 // I know, I know...I should be using composition over inheritence,
 // but refactoring the existing code would be a pain.
 class PPUState {

@@ -10,12 +10,12 @@ using namespace std;
 namespace nes {
 
 struct Input {
-  uint8 buttons;
-  uint8 frames;
+  uint8 buttons1;
+  uint8 buttons2;
 
-  Input(uint8 buttons, uint8 frames) :
-      buttons(buttons),
-      frames(frames) {};
+  Input(uint8 buttons1, uint8 buttons2) :
+      buttons1(buttons1),
+      buttons2(buttons2) {};
 };
 
 class State;
@@ -23,13 +23,11 @@ class Console;
 
 class InputSequence {
   public:
-    InputSequence(Console* console);
+    InputSequence() : inputs() {}
 
-    uint64 startFrame;
-    State* state;
-    vector<uint8> inputs;
+    vector<Input> inputs;
 
-    void RecordInput(uint8 buttons) { inputs.push_back(buttons); };
+    void RecordInput(uint8 buttons1, uint8 buttons2);
 };
 
 class Console;
@@ -37,12 +35,11 @@ class Console;
 class Session {
   public:
     Session(Console* console);
-    ~Session() {
-      delete input;
-      input = NULL;
-    }
+    ~Session();
 
     Console* console;
+    uint64 startFrame;
+    State* state;
     InputSequence* input;
 
     void RecordFrame();

@@ -13,8 +13,8 @@ void Mapper1State::Save(ostream& out) {
   utils::writeUint8(out, prgBank);
   utils::writeUint8(out, chrBank0);
   utils::writeUint8(out, chrBank1);
-  utils::writeInt32Array(out, &prgOffsets[0], sizeof(prgOffsets));
-  utils::writeInt32Array(out, &chrOffsets[0], sizeof(chrOffsets));
+  utils::writeInt32Array(out, &prgOffsets[0], kPrgOffsetsSize);
+  utils::writeInt32Array(out, &chrOffsets[0], kChrOffsetsSize);
 }
 
 void Mapper1State::Load(istream& in) {

@@ -521,8 +521,8 @@ void PPU::renderPixel() {
       color = background;
     }
   }
-  RGBA* c = &Palette[readPalette(uint16(color))%64];
-  back->SetRGBA(x, y, c);
+  uint8 pixel = readPalette(uint16(color))%64;
+  back->SetPixel(x, y, pixel);
 }
 
 uint32 PPU::fetchSpritePattern(int32 i, int32 row) {

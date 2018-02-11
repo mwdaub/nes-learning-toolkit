@@ -46,16 +46,21 @@ int Console::StepFrame() {
 
 void Console::Execute(InputSequence* input) {
   for (auto it = input->inputs.begin(); it != input->inputs.end(); it++) {
-    SetButtons1(*it);
+    SetButtons1(it->buttons1);
+    SetButtons2(it->buttons2);
     StepFrame();
   }
 }
 
-Screen* Console::Buffer() {
-  return ppu->front;
+void Console::PixelIndexes(uint8* idx) {
+  ppu->front->GetPixelIndexes(idx);
 }
 
-RGBA* Console::BackgroundColor() {
+void Console::PixelValues(uint8* vals) {
+  ppu->front->GetPixelValues(vals);
+}
+
+const RGB* Console::BackgroundColor() {
   return &Palette[ppu->readPalette(0)%64];
 }
 
