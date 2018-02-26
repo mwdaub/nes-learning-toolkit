@@ -281,7 +281,7 @@ class APU : public APUState {
     FilterChain filterChain;
 
     void Step();
-    void SetSampleRate(float64 rate);
+    void SetSamplesPerFrame(uint32 samplesPerFrame);
     void sendSample();
     float32 output();
     void stepFrameCounter();

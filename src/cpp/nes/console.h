@@ -72,8 +72,7 @@ class Console : public ConsoleState {
     const RGB* BackgroundColor();
     void SetButtons1(uint8 buttons);
     void SetButtons2(uint8 buttons);
-    void SetAudioChannel();
-    void SetAudioSampleRate(float64 sampleRate);
+    void SetAudioSamplesPerFrame(uint32 samplesPerFrame);
     void SaveState(string filename);
     void SaveState(ostream& out);
     void LoadState(string filename);

@@ -87,13 +87,8 @@ void Console::SetButtons2(uint8 buttons) {
   controller2->SetButtons(buttons);
 }
 
-void Console::SetAudioChannel() {
-  // TODO: implement audio
-  // apu->channel = channel;
-}
-
-void Console::SetAudioSampleRate(float64 sampleRate) {
-  apu->SetSampleRate(float32(sampleRate));
+void Console::SetAudioSamplesPerFrame(uint32 samplesPerFrame) {
+  apu->SetSamplesPerFrame(samplesPerFrame);
 }
 
 void Console::SaveState(string filename) {

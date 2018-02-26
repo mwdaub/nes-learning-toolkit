@@ -301,10 +301,16 @@ void APU::Step() {
   }
 }
 
-void APU::SetSampleRate(float64 rate) {
-  // Convert samples per second to cpu steps per sample
-  sampleRate = CPU::Frequency / rate;
-  filterChain.SetSampleRate(float32(rate));
+void APU::SetSamplesPerFrame(uint32 samplesPerFrame) {
+  channel.reset(new AudioChannel(samplesPerFrame));
+  // Convert samples per frame to cpu steps per sample.
+  // This uses the minimum possible value of 29780 cpu
+  // cycles per frame to ensure enough samples are gathered
+  // between frames.
+  sampleRate = 29780.0 / samplesPerFrame;
+  // Convert samples per frame to samples per second.
+  float32 rate = 60.0 * samplesPerFrame;
+  filterChain.SetSampleRate(rate);
 }
 
 void APU::sendSample() {
