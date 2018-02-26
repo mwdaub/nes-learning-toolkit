@@ -1,7 +1,9 @@
 #ifndef NES_CONSOLE_H
 #define NES_CONSOLE_H
 
+#include <array>
 #include <iostream>
+#include <memory>
 
 #include "types.h"
 #include "apu.h"
@@ -12,7 +14,13 @@
 #include "mapper.h"
 #include "session.h"
 
-using namespace std;
+using std::array;
+using std::istream;
+using std::make_unique;
+using std::ostream;
+using std::string;
+using std::shared_ptr;
+using std::unique_ptr;
 
 namespace nes {
 
@@ -23,7 +31,7 @@ class ConsoleState {
 
     static constexpr uint32 kRAMSize = 2048;
 
-    uint8 RAM[kRAMSize];
+    array<uint8, kRAMSize> RAM;
 
     void Save(ostream& out);
     void Load(istream& in);
@@ -35,47 +43,30 @@ class Console : public ConsoleState {
     Console(Cartridge* cartridge) :
         ConsoleState(),
         cartridge(cartridge),
-        session(NULL) {
+        session() {
       mapper = Mapper::Create(this);
-      controller1 = new Controller();
-      controller2 = new Controller();
-      cpu = new CPU(this);
-      apu = new APU(this, cpu);
-      ppu = new PPU(this);
+      controller1 = make_unique<Controller>();
+      controller2 = make_unique<Controller>();
+      cpu = make_unique<CPU>(this);
+      apu = make_unique<APU>(this);
+      ppu = make_unique<PPU>(this);
     };
 
-    ~Console() {
-      delete cpu;
-      cpu = NULL;
-      delete apu;
-      apu = NULL;
-      delete ppu;
-      ppu = NULL;
-      delete cartridge;
-      cartridge = NULL;
-      delete controller1;
-      controller1 = NULL;
-      delete controller2;
-      controller2 = NULL;
-      delete mapper;
-      mapper = NULL;
-      CloseSession();
-    };
-
-    CPU* cpu;
-    APU* apu;
-    PPU* ppu;
-    Cartridge* cartridge;
-    Controller* controller1;
-    Controller* controller2;
-    Mapper* mapper;
-    Session* session;
+    unique_ptr<CPU> cpu;
+    unique_ptr<APU> apu;
+    unique_ptr<PPU> ppu;
+    shared_ptr<Cartridge> cartridge;
+    unique_ptr<Controller> controller1;
+    unique_ptr<Controller> controller2;
+    unique_ptr<Mapper> mapper;
+    unique_ptr<Session> session;
 
     uint32 Size();
     void Reset();
     int Step();
     int StepFrame();
-    void Execute(InputSequence* seq);
+    void Replay(shared_ptr<InputSequence> seq, ostream& vout, ostream& aout);
+    void Replay(shared_ptr<InputSequence> seq, string video_file, string audio_file);
     void PixelIndexes(uint8* idx);
     void PixelValues(uint8* vals);
     const RGB* BackgroundColor();
@@ -88,7 +79,6 @@ class Console : public ConsoleState {
     void LoadState(string filename);
     void LoadState(istream& in);
     void NewSession();
-    void CloseSession();
 };
 
 }  // namespace nes

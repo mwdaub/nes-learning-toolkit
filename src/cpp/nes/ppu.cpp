@@ -1,9 +1,13 @@
 #include "ppu.h"
 
+#include <memory>
+
 #include "console.h"
 #include "cpu.h"
 #include "palette.h"
 #include "utils.h"
+
+using std::unique_ptr;
 
 namespace nes {
 
@@ -11,9 +15,9 @@ void PPUState::Save(ostream& out) {
   utils::writeInt32(out, cycle);
   utils::writeInt32(out, scanline);
   utils::writeUint64(out, frame);
-  utils::writeUint8Array(out, &paletteData[0], kPaletteDataSize);
-  utils::writeUint8Array(out, &nameTableData[0], kNameTableDataSize);
-  utils::writeUint8Array(out, &oamData[0], kOamDataSize);
+  utils::writeUint8Array(out, paletteData);
+  utils::writeUint8Array(out, nameTableData);
+  utils::writeUint8Array(out, oamData);
   utils::writeUint16(out, v);
   utils::writeUint16(out, t);
   utils::writeUint8(out, x);
@@ -30,10 +34,10 @@ void PPUState::Save(ostream& out) {
   utils::writeUint8(out, highTileByte);
   utils::writeUint64(out, tileData);
   utils::writeInt32(out, spriteCount);
-  utils::writeUint32Array(out, &spritePatterns[0], kSpritePatternsSize);
-  utils::writeUint8Array(out, &spritePositions[0], kSpritePositionsSize);
-  utils::writeUint8Array(out, &spritePriorities[0], kSpritePrioritiesSize);
-  utils::writeUint8Array(out, &spriteIndexes[0], kSpriteIndexesSize);
+  utils::writeUint32Array(out, spritePatterns);
+  utils::writeUint8Array(out, spritePositions);
+  utils::writeUint8Array(out, spritePriorities);
+  utils::writeUint8Array(out, spriteIndexes);
   utils::writeUint8(out, flagNameTable);
   utils::writeUint8(out, flagIncrement);
   utils::writeUint8(out, flagSpriteTable);
@@ -58,9 +62,9 @@ void PPUState::Load(istream& in) {
   cycle = utils::readInt32(in);
   scanline = utils::readInt32(in);
   frame = utils::readUint64(in);
-  utils::readUint8Array(in, &paletteData[0], kPaletteDataSize);
-  utils::readUint8Array(in, &nameTableData[0], kNameTableDataSize);
-  utils::readUint8Array(in, &oamData[0], kOamDataSize);
+  utils::readUint8Array(in, paletteData);
+  utils::readUint8Array(in, nameTableData);
+  utils::readUint8Array(in, oamData);
   v = utils::readUint16(in);
   t = utils::readUint16(in);
   x = utils::readUint8(in);
@@ -77,10 +81,10 @@ void PPUState::Load(istream& in) {
   highTileByte = utils::readUint8(in);
   tileData = utils::readUint64(in);
   spriteCount = utils::readInt32(in);
-  utils::readUint32Array(in, &spritePatterns[0], kSpritePatternsSize);
-  utils::readUint8Array(in, &spritePositions[0], kSpritePositionsSize);
-  utils::readUint8Array(in, &spritePriorities[0], kSpritePrioritiesSize);
-  utils::readUint8Array(in, &spriteIndexes[0], kSpriteIndexesSize);
+  utils::readUint32Array(in, spritePatterns);
+  utils::readUint8Array(in, spritePositions);
+  utils::readUint8Array(in, spritePriorities);
+  utils::readUint8Array(in, spriteIndexes);
   flagNameTable = utils::readUint8(in);
   flagIncrement = utils::readUint8(in);
   flagSpriteTable = utils::readUint8(in);
@@ -322,7 +326,7 @@ void PPU::writeData(uint8 value) {
 
 // $4014: OAMDMA
 void PPU::writeDMA(uint8 value) {
-  CPU* cpu = console->cpu;
+  CPU* cpu = console->cpu.get();
   uint16 address = uint16(value) << 8;
   for (int32 i = 0; i < 256; i++) {
     oamData[oamAddress] = cpu->Read(address);
@@ -402,9 +406,7 @@ void PPU::nmiChange() {
 }
 
 void PPU::setVerticalBlank() {
-  Screen* temp = front;
-  front = back;
-  back = temp;
+  front.swap(back);
   nmiOccurred = true;
   nmiChange();
 }

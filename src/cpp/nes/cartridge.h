@@ -1,11 +1,15 @@
 #ifndef NES_CARTRIDGE_H
 #define NES_CARTRIDGE_H
 
+#include <array>
 #include <iostream>
+#include <vector>
 
 #include "types.h"
 
 using namespace std;
+
+using std::array;
 
 namespace nes {
 
@@ -18,7 +22,7 @@ class CartridgeState {
 
     static constexpr uint32 kSRAMSize = 0x2000;
 
-    uint8 SRAM[kSRAMSize]; // Save RAM
+    array<uint8, kSRAMSize> SRAM; // Save RAM
     uint8 mirror;       // mirroring mode
 
     void Save(ostream& out);
@@ -28,19 +32,15 @@ class CartridgeState {
 // Using inheritence to be consistent with PPU. Maybe refactor someday...
 class Cartridge : public CartridgeState {
   public:
-    Cartridge(uint8* prg, uint32 prgLength, uint8* chr, uint32 chrLength, uint8 mapper, uint8 mirror, uint8 battery) :
+    Cartridge(vector<uint8>&& prg, vector<uint8>&& chr, uint8 mapper, uint8 mirror, uint8 battery) :
         CartridgeState(mirror),
         PRG(prg),
-        prgLength(prgLength),
         CHR(chr),
-        chrLength(chrLength),
         mapper(mapper),
         battery(battery) {};
 
-    uint8* PRG;         // PRG-ROM banks
-    uint32 prgLength;
-    uint8* CHR;         // CHR-ROM banks
-    uint32 chrLength;
+    vector<uint8> PRG;         // PRG-ROM banks
+    vector<uint8> CHR;         // CHR-ROM banks
     uint8 mapper;       // mapper type
     uint8 battery;      // battery present
 };

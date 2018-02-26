@@ -1,12 +1,16 @@
 #ifndef NES_STATE_H
 #define NES_STATE_H
 
+#include <iostream>
+#include <memory>
 #include <vector>
 
 #include "types.h"
 #include "console.h"
 
 using namespace std;
+
+using std::shared_ptr;
 
 namespace nes {
 
@@ -23,7 +27,7 @@ class State {
        dmcState(console->apu->dmc),
        ppuState(*console->ppu),
        cartridgeState(*console->cartridge),
-       mapperState(Mapper::Copy(console->mapper)) {};
+       mapperState(Mapper::Copy(console->mapper.get())) {};
 
     ConsoleState consoleState;
     CPUState cpuState;
@@ -35,7 +39,9 @@ class State {
     DMCState dmcState;
     PPUState ppuState;
     CartridgeState cartridgeState;
-    MapperState* mapperState;
+    unique_ptr<MapperState> mapperState;
+
+    void Save(ostream& out);
 };
 
 }  // namespace nes

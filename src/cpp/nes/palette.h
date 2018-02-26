@@ -1,7 +1,19 @@
 #ifndef NES_PALETTE_H
 #define NES_PALETTE_H
 
+#include <array>
+#include <iostream>
+#include <memory>
+#include <vector>
+
 #include "types.h"
+#include "utils.h"
+
+using namespace std;
+
+using std::array;
+using std::shared_ptr;
+using std::vector;
 
 namespace nes {
 
@@ -22,11 +34,32 @@ class Screen {
   public:
     Screen() : pixels{} {};
 
-    uint8 pixels[240*256];
+    static constexpr uint32 kWidth = 256;
+    static constexpr uint32 kHeight = 240;
+    static constexpr uint32 kNumPixels = kWidth*kHeight;
+    static constexpr uint32 kNumChannels = 3;
+    static constexpr uint32 kNumPixelValues = kNumPixels*kNumChannels;
+
+    array<uint8, kNumPixels> pixels;
 
     void SetPixel(int32 x, int32 y, uint8 val);
     void GetPixelIndexes(uint8* data);
     void GetPixelValues(uint8* data);
+    void Save(ostream& out);
+};
+
+class AudioChannel {
+  public:
+    AudioChannel(uint32 length) :
+        values(length),
+        position(0) {}
+
+    vector<float32> values;
+    uint32 position;
+
+    void Write(float32 value);
+    void Save(ostream& out) { utils::writeFloat32Vector(out, values); };
+    void Reset() { position = 0; };
 };
 
 }  // namespace nes

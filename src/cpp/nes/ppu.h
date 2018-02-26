@@ -1,7 +1,9 @@
 #ifndef NES_PPU_H
 #define NES_PPU_H
 
+#include <array>
 #include <iostream>
+#include <memory>
 #include <utility>
 
 #include "types.h"
@@ -10,6 +12,9 @@
 #include "utils.h"
 
 using namespace std;
+
+using std::array;
+using std::unique_ptr;
 
 namespace nes {
 
@@ -78,9 +83,9 @@ public:
     uint64 frame;   // frame counter
 
     // storage variables
-    uint8 paletteData[kPaletteDataSize];
-    uint8 nameTableData[kNameTableDataSize];
-    uint8 oamData[kOamDataSize];
+    array<uint8, kPaletteDataSize> paletteData;
+    array<uint8, kNameTableDataSize> nameTableData;
+    array<uint8, kOamDataSize> oamData;
 
     // PPU registers
     uint16 v; // current vram address (15 bit)
@@ -106,10 +111,10 @@ public:
 
     // sprite temporary variables
     int32 spriteCount;
-    uint32 spritePatterns[kSpritePatternsSize];
-    uint8 spritePositions[kSpritePositionsSize];
-    uint8 spritePriorities[kSpritePrioritiesSize];
-    uint8 spriteIndexes[kSpriteIndexesSize];
+    array<uint32, kSpritePatternsSize> spritePatterns;
+    array<uint8, kSpritePositionsSize> spritePositions;
+    array<uint8, kSpritePrioritiesSize> spritePriorities;
+    array<uint8, kSpriteIndexesSize> spriteIndexes;
 
     // $2000 PPUCTRL
     uint8 flagNameTable;       // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
@@ -147,22 +152,15 @@ class PPU : public PPUState {
   public:
     PPU(Console* console) :
         PPUState(),
-        console(console) {
-      front = new Screen();
-      back = new Screen();
+        console(console),
+        front(new Screen()),
+        back(new Screen()) {
       Reset();
     };
 
-    ~PPU() {
-      delete front;
-      front = NULL;
-      delete back;
-      back = NULL;
-    }
-
     Console* console; // parent Console
-    Screen* front;
-    Screen* back;
+    unique_ptr<Screen> front;
+    unique_ptr<Screen> back;
 
     uint8 Read(uint16 address);
     void Write(uint16 address, uint8 val);

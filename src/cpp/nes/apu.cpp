@@ -309,7 +309,9 @@ void APU::SetSampleRate(float64 rate) {
 
 void APU::sendSample() {
   float32 out = filterChain.Step(output());
-  // do something
+  if (channel) {
+    channel->Write(out);
+  } 
 }
 
 float32 APU::output() {
@@ -981,8 +983,8 @@ void DMC::stepTimer() {
 
 void DMC::stepReader() {
   if (currentLength > 0 && bitCount == 0) {
-    cpu->stall += 4;
-    shiftRegister = cpu->Read(currentAddress);
+    console->cpu->stall += 4;
+    shiftRegister = console->cpu->Read(currentAddress);
     bitCount = 8;
     currentAddress++;
     if (currentAddress == 0) {

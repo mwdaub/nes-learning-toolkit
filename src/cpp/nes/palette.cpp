@@ -2,6 +2,10 @@
 
 #include <cstring>
 
+#include "utils.h"
+
+using std::make_shared;
+
 namespace nes {
 
 const RGB Palette[64] = {
@@ -24,21 +28,32 @@ const RGB Palette[64] = {
 };
 
 void Screen::SetPixel(int32 x, int32 y, uint8 val) {
-  int i = (y<<8) + x;
+  int i = (y*kWidth) + x;
   pixels[i] = val;
 };
 
 void Screen::GetPixelIndexes(uint8* pixel_indexes) {
-  std::memcpy(pixel_indexes, pixels, 240*256);
+  std::memcpy(pixel_indexes, pixels.data(), kNumPixels);
 }
 
 void Screen::GetPixelValues(uint8* pixel_values) {
-  for (uint32 pixel = 0; pixel < 240*256; pixel++) {
+  for (uint32 pixel = 0; pixel < kNumPixels; pixel++) {
     uint8 index = pixels[pixel];
     const RGB* rgb = &Palette[index];
     *(pixel_values++) = rgb->R;
     *(pixel_values++) = rgb->G;
     *(pixel_values++) = rgb->B;
+  }
+}
+
+void Screen::Save(ostream& out) {
+  utils::writeUint8Array(out, pixels);
+}
+
+void AudioChannel::Write(float32 value) {
+  if (position < values.size()) {
+    values[position] = value;
+    position++;
   }
 }
 

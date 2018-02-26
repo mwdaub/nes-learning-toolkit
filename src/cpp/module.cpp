@@ -28,5 +28,9 @@ PyMODINIT_FUNC initnes(void) {
   Py_INCREF(InvalidRomError);
   PyModule_AddObject(m, "error", InvalidRomError);
 
+  IllegalStateError = PyErr_NewException("nes.illegal_state", NULL, NULL);
+  Py_INCREF(IllegalStateError);
+  PyModule_AddObject(m, "error", IllegalStateError);
+
   import_array();
 }

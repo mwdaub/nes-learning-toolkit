@@ -8,11 +8,11 @@ namespace nes {
 
 void Mapper4State::Save(ostream& out) {
   utils::writeUint8(out, reg);
-  utils::writeUint8Array(out, &registers[0], kRegistersSize);
+  utils::writeUint8Array(out, registers);
   utils::writeUint8(out, prgMode);
   utils::writeUint8(out, chrMode);
-  utils::writeInt32Array(out, &prgOffsets[0], kPrgOffsetsSize);
-  utils::writeInt32Array(out, &chrOffsets[0], kChrOffsetsSize);
+  utils::writeInt32Array(out, prgOffsets);
+  utils::writeInt32Array(out, chrOffsets);
   utils::writeUint8(out, reload);
   utils::writeUint8(out, counter);
   utils::writeBool(out, irqEnable);
@@ -20,18 +20,18 @@ void Mapper4State::Save(ostream& out) {
 
 void Mapper4State::Load(istream& in) {
   reg = utils::readUint8(in);
-  utils::readUint8Array(in, &registers[0], kRegistersSize);
+  utils::readUint8Array(in, registers);
   prgMode = utils::readUint8(in);
   chrMode = utils::readUint8(in);
-  utils::readInt32Array(in, &prgOffsets[0], kPrgOffsetsSize);
-  utils::readInt32Array(in, &chrOffsets[0], kChrOffsetsSize);
+  utils::readInt32Array(in, prgOffsets);
+  utils::readInt32Array(in, chrOffsets);
   reload = utils::readUint8(in);
   counter = utils::readUint8(in);
   irqEnable = utils::readBool(in);
 }
 
 void Mapper4::Step() {
-  PPU* ppu = console->ppu;
+  PPU* ppu = console->ppu.get();
   if (ppu->cycle != 280) { // TODO: this *should* be 260
     return;
   }
@@ -154,10 +154,10 @@ int32 Mapper4::prgBankOffset(int32 index) {
   if (index >= 0x80) {
     index -= 0x100;
   }
-  index %= cartridge->prgLength / 0x2000;
+  index %= cartridge->PRG.size() / 0x2000;
   int32 offset = index * 0x2000;
   if (offset < 0) {
-    offset += cartridge->prgLength;
+    offset += cartridge->PRG.size();
   }
   return offset;
 }
@@ -166,10 +166,10 @@ int32 Mapper4::chrBankOffset(int32 index) {
   if (index >= 0x80) {
     index -= 0x100;
   }
-  index %= cartridge->chrLength / 0x0400;
+  index %= cartridge->CHR.size() / 0x0400;
   int32 offset = index * 0x0400;
   if (offset < 0) {
-    offset += cartridge->chrLength;
+    offset += cartridge->CHR.size();
   }
   return offset;
 }

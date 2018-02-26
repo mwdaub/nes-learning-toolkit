@@ -2,10 +2,13 @@
 #define NES_MAPPER_H
 
 #include <iostream>
+#include <memory>
 
 #include "types.h"
 
-using namespace std;
+using std::istream;
+using std::ostream;
+using std::unique_ptr;
 
 namespace nes {
 
@@ -24,10 +27,10 @@ class Mapper : virtual public MapperState {
     virtual void Step() = 0;
     virtual uint8 Read(uint16 address) = 0;
     virtual void Write(uint16 address, uint8 value) = 0;
-    virtual MapperState* Copy() = 0;
+    virtual unique_ptr<MapperState> Copy() = 0;
 
-    static Mapper* Create(Console* console);
-    static MapperState* Copy(Mapper* mapper);
+    static unique_ptr<Mapper> Create(Console* console);
+    static unique_ptr<MapperState> Copy(Mapper* mapper);
 };
 
 }  // namespace nes

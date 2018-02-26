@@ -1,9 +1,16 @@
 #ifndef NES_MAPPER4_H
 #define NES_MAPPER4_H
 
+#include <array>
+
 #include "types.h"
 #include "cartridge.h"
 #include "mapper.h"
+
+using std::array;
+using std::make_unique;
+using std::shared_ptr;
+using std::unique_ptr;
 
 namespace nes {
 
@@ -28,11 +35,11 @@ class Mapper4State : virtual public MapperState {
     static constexpr uint32 kChrOffsetsSize = 8;
 
     uint8 reg;
-    uint8 registers[kRegistersSize];
+    array<uint8, kRegistersSize> registers;
     uint8 prgMode;
     uint8 chrMode;
-    int32 prgOffsets[kPrgOffsetsSize];
-    int32 chrOffsets[kChrOffsetsSize];
+    array<int32, kPrgOffsetsSize> prgOffsets;
+    array<int32, kChrOffsetsSize> chrOffsets;
     uint8 reload;
     uint8 counter;
     bool irqEnable;
@@ -44,7 +51,7 @@ class Mapper4State : virtual public MapperState {
 // Using inheritence to be consistent with PPU. Maybe refactor someday...
 class Mapper4 : virtual public Mapper, public Mapper4State {
   public:
-    Mapper4(Cartridge* cartridge, Console* console) :
+    Mapper4(shared_ptr<Cartridge> cartridge, Console* console) :
         Mapper4State(),
         cartridge(cartridge),
         console(console) {
@@ -55,13 +62,13 @@ class Mapper4 : virtual public Mapper, public Mapper4State {
     };
     virtual ~Mapper4() {};
 
-    Cartridge* cartridge;
+    shared_ptr<Cartridge> cartridge;
     Console* console;
 
     virtual uint8 Read(uint16 address) override;
     virtual void Write(uint16 address, uint8 value) override;
     virtual void Step() override;
-    virtual MapperState* Copy() override { return new Mapper4State(*this); };
+    virtual unique_ptr<MapperState> Copy() override { return make_unique<Mapper4State>(*this); };
 
     void HandleScanLine();
     void writeRegister(uint16 address, uint8 value);

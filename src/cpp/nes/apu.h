@@ -3,12 +3,16 @@
 
 #include <iostream>
 #include <limits>
+#include <memory>
 
 #include "types.h"
 #include "cpu.h"
 #include "filter.h"
+#include "palette.h"
 
 using namespace std;
+
+using std::unique_ptr;
 
 namespace nes {
 
@@ -214,11 +218,11 @@ class DMCState {
 // Using inheritence to be consistent with PPU. Maybe refactor someday...
 class DMC : public DMCState {
   public:
-    DMC(CPU* cpu) :
+    DMC(Console* console) :
         DMCState(),
-        cpu(cpu) {};
+        console(console) {};
 
-    CPU* cpu;
+    Console* console;
 
     void writeControl(uint8 value);
     void writeValue(uint8 value);
@@ -252,26 +256,22 @@ class APUState {
 // Using inheritence to be consistent with PPU. Maybe refactor someday...
 class APU : public APUState {
   public:
-    APU(Console* console, CPU* cpu) :
+    APU(Console* console) :
         APUState(),
         console(console),
-        // channel(0),
+        channel(new AudioChannel(0)),
         sampleRate(numeric_limits<float64>::infinity()),
         pulse1(),
         pulse2(),
         triangle(),
         noise(),
-        dmc(cpu),
+        dmc(console),
         filterChain() {};
-    ~APU() {
-      // delete channel;
-      // channel = 0;
-    }
 
     static constexpr float64 frameCounterRate = CPU::Frequency / 240.0;
 
     Console* console;
-    // float32* channel;
+    unique_ptr<AudioChannel> channel;
     float64 sampleRate;
     Pulse pulse1;
     Pulse pulse2;

@@ -7,16 +7,15 @@
 namespace nes {
 
 void ConsoleState::Save(ostream& out) {
-  utils::writeUint8Array(out, &RAM[0], kRAMSize);
+  utils::writeUint8Array(out, RAM);
 }
 
 void ConsoleState::Load(istream& in) {
-  utils::readUint8Array(in, &RAM[0], kRAMSize);
+  utils::readUint8Array(in, RAM);
 }
 
 void Console::Reset() {
   cpu->Reset();
-  CloseSession();
 }
 
 int Console::Step() {
@@ -34,22 +33,38 @@ int Console::Step() {
 
 int Console::StepFrame() {
   if (session) {
-    session->RecordFrame();
+    session->RecordFrameStart();
   }
+  apu->channel->Reset();
   int32 cpuCycles = 0;
   uint64 frame = ppu->frame;
   while (frame == ppu->frame) {
     cpuCycles += Step();
   }
+  if (session) {
+    session->RecordFrameEnd();
+  }
   return cpuCycles;
 }
 
-void Console::Execute(InputSequence* input) {
-  for (auto it = input->inputs.begin(); it != input->inputs.end(); it++) {
-    SetButtons1(it->buttons1);
-    SetButtons2(it->buttons2);
+void Console::Replay(shared_ptr<InputSequence> input, ostream& vout, ostream& aout) {
+  for (auto& in : input->inputs) {
+    SetButtons1(in.buttons1);
+    SetButtons2(in.buttons2);
     StepFrame();
+    ppu->front->Save(vout);
+    apu->channel->Save(aout);
   }
+}
+
+void Console::Replay(shared_ptr<InputSequence> input, string video_file, string audio_file) {
+  fstream video_fs;
+  fstream audio_fs;
+  video_fs.open(video_file.c_str(), fstream::out);
+  audio_fs.open(audio_file.c_str(), fstream::out);
+  Replay(input, video_fs, audio_fs);
+  video_fs.close();
+  audio_fs.close();
 }
 
 void Console::PixelIndexes(uint8* idx) {
@@ -124,15 +139,7 @@ void Console::LoadState(istream& in) {
 }
 
 void Console::NewSession() {
-  delete session;
-  session = new Session(this);
-}
-
-void Console::CloseSession() {
-  if (session) {
-    delete session;
-    session = NULL;
-  }
+  session.reset(new Session(this));
 }
 
 }  // namespace nes;

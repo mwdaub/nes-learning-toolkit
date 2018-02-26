@@ -13,8 +13,8 @@ void Mapper1State::Save(ostream& out) {
   utils::writeUint8(out, prgBank);
   utils::writeUint8(out, chrBank0);
   utils::writeUint8(out, chrBank1);
-  utils::writeInt32Array(out, &prgOffsets[0], kPrgOffsetsSize);
-  utils::writeInt32Array(out, &chrOffsets[0], kChrOffsetsSize);
+  utils::writeInt32Array(out, prgOffsets);
+  utils::writeInt32Array(out, chrOffsets);
 }
 
 void Mapper1State::Load(istream& in) {
@@ -25,8 +25,8 @@ void Mapper1State::Load(istream& in) {
   prgBank = utils::readUint8(in);
   chrBank0 = utils::readUint8(in);
   chrBank1 = utils::readUint8(in);
-  utils::readInt32Array(in, &prgOffsets[0], kPrgOffsetsSize);
-  utils::readInt32Array(in, &chrOffsets[0], kChrOffsetsSize);
+  utils::readInt32Array(in, prgOffsets);
+  utils::readInt32Array(in, chrOffsets);
 }
 
 uint8 Mapper1::Read(uint16 address) {
@@ -135,10 +135,10 @@ int32 Mapper1::prgBankOffset(int32 index) {
   if (index >= 0x80) {
     index -= 0x100;
   }
-  index %= cartridge->prgLength / 0x4000;
+  index %= cartridge->PRG.size() / 0x4000;
   int32 offset = index * 0x4000;
   if (offset < 0) {
-    offset += cartridge->prgLength;
+    offset += cartridge->PRG.size();
   }
   return offset;
 }
@@ -147,10 +147,10 @@ int32 Mapper1::chrBankOffset(int32 index) {
   if (index >= 0x80) {
     index -= 0x100;
   }
-  index %= cartridge->chrLength / 0x1000;
+  index %= cartridge->CHR.size() / 0x1000;
   int32 offset = index * 0x1000;
   if (offset < 0) {
-    offset += cartridge->chrLength;
+    offset += cartridge->CHR.size();
   }
   return offset;
 }

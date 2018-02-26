@@ -76,6 +76,15 @@ void writeInt32(ostream& out, int32 val) {
   writeUint32(out, uint32(val));
 }
 
+float32 readFloat32(istream& in) {
+  uint32 v = readUint32(in);
+  return *reinterpret_cast<float32*>(&v);
+}
+
+void writeFloat32(ostream& out, float32 val) {
+  writeUint32(out, *reinterpret_cast<uint32*>(&val));
+}
+
 uint64 readUint64(istream& in) {
   uint32 v1 = readUint32(in);
   uint32 v2 = readUint32(in);
@@ -95,49 +104,6 @@ int64 readInt64(istream& in) {
 void writeInt64(ostream& out, int64 val) {
   writeUint64(out, uint64(val));
 }
-
-void readUint8Array(istream& in, uint8* val, uint32 length) {
-  for (uint32 i = 0; i < length; i++) {
-    *val = readUint8(in);
-    val++;
-  }
-}
-
-void writeUint8Array(ostream& out, uint8* val, uint32 length) {
-  for (uint32 i = 0; i < length; i++) {
-    writeUint8(out, *val);
-    val++;
-  }
-}
-
-void readUint32Array(istream& in, uint32* val, uint32 length) {
-  for (uint32 i = 0; i < length; i++) {
-    *val = readUint32(in);
-    val++;
-  }
-}
-
-void writeUint32Array(ostream& out, uint32* val, uint32 length) {
-  for (uint32 i = 0; i < length; i++) {
-    writeUint32(out, *val);
-    val++;
-  }
-}
-
-void readInt32Array(istream& in, int32* val, uint32 length) {
-  for (uint32 i = 0; i < length; i++) {
-    *val = readInt32(in);
-    val++;
-  }
-}
-
-void writeInt32Array(ostream& out, int32* val, uint32 length) {
-  for (uint32 i = 0; i < length; i++) {
-    writeInt32(out, *val);
-    val++;
-  }
-}
-
 
 }  // namespace utils
 

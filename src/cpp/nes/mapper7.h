@@ -5,6 +5,10 @@
 #include "cartridge.h"
 #include "mapper.h"
 
+using std::make_unique;
+using std::shared_ptr;
+using std::unique_ptr;
+
 namespace nes {
 
 // State that gets persisted when creating a save state.
@@ -22,17 +26,17 @@ class Mapper7State : virtual public MapperState {
 // Using inheritence to be consistent with PPU. Maybe refactor someday...
 class Mapper7 : virtual public Mapper, public Mapper7State {
   public:
-    Mapper7(Cartridge* cartridge) :
+    Mapper7(shared_ptr<Cartridge> cartridge) :
         Mapper7State(),
         cartridge(cartridge) {};
     virtual ~Mapper7() {};
 
-    Cartridge* cartridge;
+    shared_ptr<Cartridge> cartridge;
 
     virtual uint8 Read(uint16 address) override;
     virtual void Write(uint16 address, uint8 value) override;
     virtual void Step() override {};
-    virtual MapperState* Copy() override { return new Mapper7State(*this); };
+    virtual unique_ptr<MapperState> Copy() override { return make_unique<Mapper7State>(*this); };
 };
 
 }  // namespace nes

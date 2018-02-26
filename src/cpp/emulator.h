@@ -12,6 +12,9 @@ using namespace nes;
 // Python error for when a file is not a valid ROM format.
 static PyObject *InvalidRomError;
 
+// Python error for when a file is not a valid ROM format.
+static PyObject *IllegalStateError;
+
 // Emulator.
 typedef struct {
   PyObject_HEAD
@@ -119,7 +122,7 @@ static PyObject * Emulator_get_pixel_indexes(Emulator* self, PyObject *args) {
   }
 
   // Dimensions of the game pixel indexes.
-  static long int dims[] = {240, 256};
+  static long int dims[] = {Screen::kHeight, Screen::kWidth};
 
   PyObject* array = PyArray_SimpleNew(3, dims, NPY_UINT8);
   uint8* data = (uint8*) PyArray_DATA(array);
@@ -134,7 +137,7 @@ static PyObject * Emulator_get_pixel_values(Emulator* self, PyObject *args) {
   }
 
   // Dimensions of the game pixels.
-  static long int dims[] = {240, 256, 3};
+  static long int dims[] = {Screen::kHeight, Screen::kWidth, Screen::kNumChannels};
 
   PyObject* array = PyArray_SimpleNew(3, dims, NPY_UINT8);
   uint8* data = (uint8*) PyArray_DATA(array);
@@ -177,6 +180,27 @@ static PyObject * Emulator_new_session(Emulator* self, PyObject *args) {
   return Py_None;
 }
 
+// Start a new session for recording controller input.
+static PyObject * Emulator_save_session(Emulator* self, PyObject *args) {
+  char* stateFileName;
+
+  // parse arguments
+  if (!PyArg_ParseTuple(args, "s", &stateFileName)) {
+    return NULL;
+  }
+
+  if (!self->console->session) {
+    // TODO
+    return NULL;
+  }
+
+  string str(stateFileName);
+  self->console->session->Save(str);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 static PyMethodDef Emulator_methods[] = {
   { "save_state", (PyCFunction)Emulator_save_state, METH_VARARGS, "Save NES savestate." },
   { "load_state", (PyCFunction)Emulator_load_state, METH_VARARGS, "Load NES savestate." },
@@ -187,6 +211,7 @@ static PyMethodDef Emulator_methods[] = {
   { "get_pixel_values", (PyCFunction)Emulator_get_pixel_values, METH_VARARGS, "Get an array containing the current RGB pixel values." },
   { "read_memory", (PyCFunction)Emulator_read_memory, METH_VARARGS, "Read the value at the given memory address." },
   { "new_session", (PyCFunction)Emulator_new_session, METH_VARARGS, "Start a new recording session." },
+  { "save_session", (PyCFunction)Emulator_save_session, METH_VARARGS, "Save the existing recording session." },
   {NULL}  /* Sentinel */
 };
 

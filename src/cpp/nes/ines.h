@@ -28,8 +28,8 @@ Cartridge* LoadiNESFile(string path) {
   uint8 control1 = utils::readUint8(fs);
   uint8 control2 = utils::readUint8(fs);
   uint8 numRAM = utils::readUint8(fs);
-  uint8 padding[7];
-  utils::readUint8Array(fs, &padding[0], 7);
+  array<uint8, 7> padding;
+  utils::readUint8Array(fs, padding);
   if (magic != iNESFileMagic) {
     return NULL;
   }
@@ -55,20 +55,17 @@ Cartridge* LoadiNESFile(string path) {
 
   // read prg-rom bank(s)
   uint32 prgLength = numPRG*16384;
-  uint8* prg = new uint8[prgLength];
-  utils::readUint8Array(fs, &prg[0], prgLength);
+  vector<uint8> prg(prgLength);
+  utils::readUint8Vector(fs, prg);
 
   // read chr-rom bank(s)
-  uint32 chrLength;
-  uint8* chr;
-  if (numCHR == 0) {
-    // provide chr-rom/ram if not in file
-    chrLength = 8192;
-    chr = new uint8[chrLength];
-  } else {
+  uint32 chrLength = 8192;
+  if (numCHR != 0) {
     chrLength = numCHR*8192;
-    chr = new uint8[chrLength];
-    utils::readUint8Array(fs, &chr[0], chrLength);
+  }
+  vector<uint8> chr(chrLength);
+  if (numCHR != 0) {
+    utils::readUint8Vector(fs, chr);
   }
 
   if (fs.fail()) {
@@ -78,7 +75,7 @@ Cartridge* LoadiNESFile(string path) {
   fs.close();
 
   // success
-  return new Cartridge(prg, prgLength, chr, chrLength, mapper, mirror, battery);
+  return new Cartridge(std::move(prg), std::move(chr), mapper, mirror, battery);
 }
 
 }  // namespace nes
