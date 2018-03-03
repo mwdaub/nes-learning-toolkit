@@ -25,6 +25,12 @@ class Mapper225State : virtual public MapperState {
 
     virtual void Save(ostream& out) override;
     virtual void Load(istream& in) override;
+    virtual void Load(MapperState* o) {
+      o->CopyTo(this);
+    }
+    virtual void CopyTo(Mapper225State* o) {
+      *o = *this;
+    }
 };
 
 // Using inheritence to be consistent with PPU. Maybe refactor someday...

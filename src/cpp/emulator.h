@@ -39,6 +39,7 @@ static int Emulator_init(Emulator *self, PyObject *args, PyObject *kwds) {
   string str(romFileName);
   Cartridge* cartridge = LoadiNESFile(str);
   self->console = new Console(cartridge);
+  self->console->SetAudioSamplesPerFrame(735);
 
   return 0;
 }
@@ -101,9 +102,9 @@ static PyObject * Emulator_set_input(Emulator* self, PyObject *args) {
 
 // Emulate a single frame.
 static PyObject * Emulator_emulate(Emulator* self, PyObject *args) {
-  uint8 numFrames = 1;
+  uint32 numFrames = 1;
   // parse arguments
-  if (!PyArg_ParseTuple(args, "|B", &numFrames)) {
+  if (!PyArg_ParseTuple(args, "|I", &numFrames)) {
     return NULL;
   }
 
@@ -167,7 +168,7 @@ static PyObject * Emulator_read_memory(Emulator* self, PyObject *args) {
   return Py_BuildValue("B", memValue);
 }
 
-// Start a new session for recording controller input.
+// Start a new session for recording controller input and A/V output.
 static PyObject * Emulator_new_session(Emulator* self, PyObject *args) {
   // parse arguments
   if (!PyArg_ParseTuple(args, "")) {
@@ -180,12 +181,12 @@ static PyObject * Emulator_new_session(Emulator* self, PyObject *args) {
   return Py_None;
 }
 
-// Start a new session for recording controller input.
+// Save the existing session.
 static PyObject * Emulator_save_session(Emulator* self, PyObject *args) {
-  char* stateFileName;
+  char* outputFileName;
 
   // parse arguments
-  if (!PyArg_ParseTuple(args, "s", &stateFileName)) {
+  if (!PyArg_ParseTuple(args, "s", &outputFileName)) {
     return NULL;
   }
 
@@ -194,8 +195,33 @@ static PyObject * Emulator_save_session(Emulator* self, PyObject *args) {
     return NULL;
   }
 
-  string str(stateFileName);
+  string str(outputFileName);
   self->console->session->Save(str);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+// Replay a previously recorded session for recording controller input.
+static PyObject * Emulator_replay_session(Emulator* self, PyObject *args) {
+  char* inputFileName;
+  char* videoFileName;
+  char* audioFileName;
+
+  // parse arguments
+  if (!PyArg_ParseTuple(args, "sss", &inputFileName, &videoFileName, &audioFileName)) {
+    return NULL;
+  }
+
+  if (self->console->cpu->cycles) {
+    // TODO
+    return NULL;
+  }
+
+  string input(inputFileName);
+  string video(videoFileName);
+  string audio(audioFileName);
+  self->console->Replay(input, video, audio);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -212,6 +238,7 @@ static PyMethodDef Emulator_methods[] = {
   { "read_memory", (PyCFunction)Emulator_read_memory, METH_VARARGS, "Read the value at the given memory address." },
   { "new_session", (PyCFunction)Emulator_new_session, METH_VARARGS, "Start a new recording session." },
   { "save_session", (PyCFunction)Emulator_save_session, METH_VARARGS, "Save the existing recording session." },
+  { "replay_session", (PyCFunction)Emulator_replay_session, METH_VARARGS, "Replay a previously recorded session." },
   {NULL}  /* Sentinel */
 };
 

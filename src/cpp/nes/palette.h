@@ -46,6 +46,8 @@ class Screen {
     void GetPixelIndexes(uint8* data);
     void GetPixelValues(uint8* data);
     void Save(ostream& out);
+    void SaveValues(ostream& out);
+    void Load(istream& in);
 };
 
 class AudioChannel {

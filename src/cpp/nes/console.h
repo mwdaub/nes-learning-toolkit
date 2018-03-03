@@ -61,12 +61,11 @@ class Console : public ConsoleState {
     unique_ptr<Mapper> mapper;
     unique_ptr<Session> session;
 
-    uint32 Size();
     void Reset();
     int Step();
     int StepFrame();
-    void Replay(shared_ptr<InputSequence> seq, ostream& vout, ostream& aout);
-    void Replay(shared_ptr<InputSequence> seq, string video_file, string audio_file);
+    void Replay(InputSequence& is, ostream& vout, ostream& aout);
+    void Replay(string& input_file, string& video_file, string& audio_file);
     void PixelIndexes(uint8* idx);
     void PixelValues(uint8* vals);
     const RGB* BackgroundColor();
@@ -77,7 +76,10 @@ class Console : public ConsoleState {
     void SaveState(ostream& out);
     void LoadState(string filename);
     void LoadState(istream& in);
-    void NewSession();
+    void LoadState(State& state);
+    void NewSession(RecordingMode mode = RecordingMode::INPUT);
+    void LoadSession(istream& in, RecordingMode mode = RecordingMode::INPUT);
+    void LoadSession(const string& filename, RecordingMode mode = RecordingMode::INPUT);
 };
 
 }  // namespace nes

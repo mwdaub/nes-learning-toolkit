@@ -16,4 +16,19 @@ void State::Save(ostream& out) {
   mapperState->Save(out);
 }
 
+void State::Load(istream& out) {
+  consoleState.Load(out);
+  cpuState.Load(out);
+  apuState.Load(out);
+  pulseState1.Load(out);
+  pulseState2.Load(out);
+  triangleState.Load(out);
+  noiseState.Load(out);
+  dmcState.Load(out);
+  ppuState.Load(out);
+  cartridgeState.Load(out);
+  mapperState = MapperState::Create(cartridgeState.mapper);
+  mapperState->Load(out);
+}
+
 }  // namespace nes

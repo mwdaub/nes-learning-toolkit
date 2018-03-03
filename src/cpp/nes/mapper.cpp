@@ -33,6 +33,26 @@ unique_ptr<Mapper> Mapper::Create(Console* console) {
   return 0;
 }
 
+unique_ptr<MapperState> MapperState::Create(uint8 mapper) {
+  switch (mapper) {
+  case 0:
+    return make_unique<Mapper2State>();
+  case 1:
+    return make_unique<Mapper1State>();
+  case 2:
+    return make_unique<Mapper2State>();
+  case 3:
+    return make_unique<Mapper3State>();
+  case 4:
+    return make_unique<Mapper4State>();
+  case 7:
+    return make_unique<Mapper7State>();
+  case 225:
+    return make_unique<Mapper225State>();
+  }
+  return 0;
+}
+
 unique_ptr<MapperState> Mapper::Copy(Mapper* mapper) {
   if (mapper) {
     return mapper->Copy();

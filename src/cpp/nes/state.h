@@ -16,6 +16,18 @@ namespace nes {
 
 class State {
   public:
+    State() :
+       consoleState(),
+       cpuState(),
+       apuState(),
+       pulseState1(),
+       pulseState2(),
+       triangleState(),
+       noiseState(),
+       dmcState(),
+       ppuState(),
+       cartridgeState(),
+       mapperState() {};
     State(Console* console) :
        consoleState(*console),
        cpuState(*console->cpu),
@@ -42,6 +54,7 @@ class State {
     unique_ptr<MapperState> mapperState;
 
     void Save(ostream& out);
+    void Load(istream& in);
 };
 
 }  // namespace nes

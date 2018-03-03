@@ -50,6 +50,16 @@ void Screen::Save(ostream& out) {
   utils::writeUint8Array(out, pixels);
 }
 
+void Screen::SaveValues(ostream& out) {
+  array<uint8, kNumPixelValues> values;
+  GetPixelValues(values.data());
+  utils::writeUint8Array(out, values);
+}
+
+void Screen::Load(istream& in) {
+  utils::readUint8Array(in, pixels);
+}
+
 void AudioChannel::Write(float32 value) {
   if (position < values.size()) {
     values[position] = value;

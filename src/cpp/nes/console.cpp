@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "palette.h"
+#include "state.h"
 
 namespace nes {
 
@@ -15,6 +16,7 @@ void ConsoleState::Load(istream& in) {
 }
 
 void Console::Reset() {
+  session.release();
   cpu->Reset();
 }
 
@@ -47,22 +49,27 @@ int Console::StepFrame() {
   return cpuCycles;
 }
 
-void Console::Replay(shared_ptr<InputSequence> input, ostream& vout, ostream& aout) {
-  for (auto& in : input->inputs) {
+void Console::Replay(InputSequence& is, ostream& vout, ostream& aout) {
+  for (auto& in : is.inputs) {
     SetButtons1(in.buttons1);
     SetButtons2(in.buttons2);
     StepFrame();
-    ppu->front->Save(vout);
+    ppu->front->SaveValues(vout);
     apu->channel->Save(aout);
   }
 }
 
-void Console::Replay(shared_ptr<InputSequence> input, string video_file, string audio_file) {
+void Console::Replay(string& input_file, string& video_file, string& audio_file) {
+  Session session(this, RecordingMode::INPUT);
+  fstream input_fs;
+  input_fs.open(input_file.c_str(), fstream::in);
+  session.Load(input_fs);
+  input_fs.close();
   fstream video_fs;
   fstream audio_fs;
   video_fs.open(video_file.c_str(), fstream::out);
   audio_fs.open(audio_file.c_str(), fstream::out);
-  Replay(input, video_fs, audio_fs);
+  Replay(*session.input, video_fs, audio_fs);
   video_fs.close();
   audio_fs.close();
 }
@@ -133,8 +140,45 @@ void Console::LoadState(istream& in) {
   mapper->Load(in);
 }
 
-void Console::NewSession() {
-  session.reset(new Session(this));
+void Console::LoadState(State& state) {
+  ConsoleState* consoleState = this;
+  *consoleState = state.consoleState;
+  CPUState* cpuState = cpu.get();
+  *cpuState = state.cpuState;
+  APUState* apuState = apu.get();
+  *apuState = state.apuState;
+  PulseState* pulseState = &apu->pulse1;
+  *pulseState = state.pulseState1;
+  pulseState = &apu->pulse2;
+  *pulseState = state.pulseState2;
+  TriangleState* triangleState = &apu->triangle;
+  *triangleState = state.triangleState;
+  NoiseState* noiseState = &apu->noise;
+  *noiseState = state.noiseState;
+  DMCState* dmcState = &apu->dmc;
+  *dmcState = state.dmcState;
+  PPUState* ppuState = ppu.get();
+  *ppuState = state.ppuState;
+  CartridgeState* cartridgeState = cartridge.get();
+  *cartridgeState = state.cartridgeState;
+  MapperState* mapperState = mapper.get();
+  mapperState->Load(state.mapperState.get());
+}
+
+void Console::NewSession(RecordingMode mode) {
+  session.reset(new Session(this, mode));
+}
+
+void Console::LoadSession(istream& in, RecordingMode mode) {
+  session.reset(new Session(this, mode));
+  session->Load(in);
+}
+
+void Console::LoadSession(const string& filename, RecordingMode mode) {
+  fstream fs;
+  fs.open(filename.c_str(), fstream::in);
+  LoadSession(fs);
+  fs.close();
 }
 
 }  // namespace nes;
