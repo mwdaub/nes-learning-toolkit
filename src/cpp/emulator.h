@@ -5,6 +5,7 @@
 #include "nes/types.h"
 #include "nes/console.h"
 #include "nes/ines.h"
+#include "nes/palette.h"
 
 using namespace std;
 using namespace nes;
@@ -146,6 +147,21 @@ static PyObject * Emulator_get_pixel_values(Emulator* self, PyObject *args) {
   return array;
 }
 
+static PyObject * Emulator_get_audio_samples(Emulator* self, PyObject *args) {
+  // parse arguments
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  // Dimensions of the game pixels.
+  long int dims[] = { self->console->apu->channel->values.size() };
+
+  PyObject* array = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+  uint8* data = (uint8*) PyArray_DATA(array);
+  self->console->apu->channel->GetAudioSamples(data);
+  return array;
+}
+
 // Read the value at the given memory address.
 //
 // Key SMB values: 0x0756 size (0 = small, 1 = big, 2 = fire), 0x075A lives, 0x075C stage number, 0x075E coins, 0x075F world number
@@ -202,29 +218,46 @@ static PyObject * Emulator_save_session(Emulator* self, PyObject *args) {
   return Py_None;
 }
 
-// Replay a previously recorded session for recording controller input.
-static PyObject * Emulator_replay_session(Emulator* self, PyObject *args) {
-  char* inputFileName;
-  char* videoFileName;
-  char* audioFileName;
+// Load a previously recorded session.
+static PyObject * Emulator_load_session(Emulator* self, PyObject *args) {
+  char* recordingFileName;
 
   // parse arguments
-  if (!PyArg_ParseTuple(args, "sss", &inputFileName, &videoFileName, &audioFileName)) {
+  if (!PyArg_ParseTuple(args, "s", &recordingFileName)) {
     return NULL;
   }
 
-  if (self->console->cpu->cycles) {
+  if (self->console->session) {
     // TODO
     return NULL;
   }
 
-  string input(inputFileName);
-  string video(videoFileName);
-  string audio(audioFileName);
-  self->console->Replay(input, video, audio);
+  string recordingFile(recordingFileName);
+  self->console->LoadSession(recordingFile);
 
   Py_INCREF(Py_None);
   return Py_None;
+}
+
+// Determine if the emulator is currently replaying a previously recorded session.
+static PyObject * Emulator_is_replay(Emulator* self, PyObject *args) {
+  // parse arguments
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  if (!self->console->session) {
+    // TODO
+    return NULL;
+  }
+
+  if (self->console->session->ShouldReplay()) {
+    Py_INCREF(Py_True);
+    return Py_True;
+  } else {
+    Py_INCREF(Py_False);
+    return Py_False;
+  }
 }
 
 static PyMethodDef Emulator_methods[] = {
@@ -235,10 +268,12 @@ static PyMethodDef Emulator_methods[] = {
   { "emulate", (PyCFunction)Emulator_emulate, METH_KEYWORDS, "Emulate the number of specified frames." },
   { "get_pixel_indexes", (PyCFunction)Emulator_get_pixel_indexes, METH_VARARGS, "Get an array containing the current pixel indexes. Each index is in the range [0..63]" },
   { "get_pixel_values", (PyCFunction)Emulator_get_pixel_values, METH_VARARGS, "Get an array containing the current RGB pixel values." },
+  { "get_audio_samples", (PyCFunction)Emulator_get_audio_samples, METH_VARARGS, "Get the audio samples for the current frame." },
   { "read_memory", (PyCFunction)Emulator_read_memory, METH_VARARGS, "Read the value at the given memory address." },
-  { "new_session", (PyCFunction)Emulator_new_session, METH_VARARGS, "Start a new recording session." },
-  { "save_session", (PyCFunction)Emulator_save_session, METH_VARARGS, "Save the existing recording session." },
-  { "replay_session", (PyCFunction)Emulator_replay_session, METH_VARARGS, "Replay a previously recorded session." },
+  { "new_session", (PyCFunction)Emulator_new_session, METH_VARARGS, "Start a new recording." },
+  { "save_session", (PyCFunction)Emulator_save_session, METH_VARARGS, "Save the existing recording." },
+  { "load_session", (PyCFunction)Emulator_load_session, METH_VARARGS, "Load a previously recorded recording." },
+  { "is_replay", (PyCFunction)Emulator_is_replay, METH_VARARGS, "Determine if emulator is currently replaying a previous recording." },
   {NULL}  /* Sentinel */
 };
 

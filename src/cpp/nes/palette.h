@@ -60,7 +60,8 @@ class AudioChannel {
     uint32 position;
 
     void Write(float32 value);
-    void Save(ostream& out) { utils::writeFloat32Vector(out, values); };
+    void GetAudioSamples(uint8* data);
+    void Save(ostream& out);
     void Reset() { position = 0; };
 };
 

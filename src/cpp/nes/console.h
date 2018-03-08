@@ -64,8 +64,7 @@ class Console : public ConsoleState {
     void Reset();
     int Step();
     int StepFrame();
-    void Replay(InputSequence& is, ostream& vout, ostream& aout);
-    void Replay(string& input_file, string& video_file, string& audio_file);
+    int64 CurrentFrame();
     void PixelIndexes(uint8* idx);
     void PixelValues(uint8* vals);
     const RGB* BackgroundColor();

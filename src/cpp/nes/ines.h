@@ -75,7 +75,7 @@ Cartridge* LoadiNESFile(string path) {
   fs.close();
 
   // success
-  return new Cartridge(std::move(prg), std::move(chr), mapper, mirror, battery);
+  return new Cartridge(prg, chr, mapper, mirror, battery);
 }
 
 }  // namespace nes

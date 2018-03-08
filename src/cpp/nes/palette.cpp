@@ -67,4 +67,18 @@ void AudioChannel::Write(float32 value) {
   }
 }
 
+void AudioChannel::Save(ostream& out) {
+  utils::writeFloat32Vector(out, values);
+}
+
+void AudioChannel::GetAudioSamples(uint8* data) {
+  for (uint32 sample = 0; sample < values.size(); sample++) {
+    uint32 val = *reinterpret_cast<uint32*>(&values[sample]);
+    *(data++) = val;
+    *(data++) = (val >> 8);
+    *(data++) = (val >> 16);
+    *(data++) = (val >> 24);
+  }
+}
+
 }  // namespace nes

@@ -82,8 +82,11 @@ class Session {
     unique_ptr<InputSequence> input;
     unique_ptr<OutputSequence> output;
 
-    void RecordFrameStart();
-    void RecordFrameEnd();
+    bool ShouldRecordInput();
+    bool ShouldRecordOutput();
+    bool ShouldReplay();
+    void FrameStart();
+    void FrameEnd();
     void Save(ostream& out);
     void Save(string filename);
     void Load(istream& in);

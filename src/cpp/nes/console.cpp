@@ -35,7 +35,7 @@ int Console::Step() {
 
 int Console::StepFrame() {
   if (session) {
-    session->RecordFrameStart();
+    session->FrameStart();
   }
   apu->channel->Reset();
   int32 cpuCycles = 0;
@@ -44,34 +44,13 @@ int Console::StepFrame() {
     cpuCycles += Step();
   }
   if (session) {
-    session->RecordFrameEnd();
+    session->FrameEnd();
   }
   return cpuCycles;
 }
 
-void Console::Replay(InputSequence& is, ostream& vout, ostream& aout) {
-  for (auto& in : is.inputs) {
-    SetButtons1(in.buttons1);
-    SetButtons2(in.buttons2);
-    StepFrame();
-    ppu->front->SaveValues(vout);
-    apu->channel->Save(aout);
-  }
-}
-
-void Console::Replay(string& input_file, string& video_file, string& audio_file) {
-  Session session(this, RecordingMode::INPUT);
-  fstream input_fs;
-  input_fs.open(input_file.c_str(), fstream::in);
-  session.Load(input_fs);
-  input_fs.close();
-  fstream video_fs;
-  fstream audio_fs;
-  video_fs.open(video_file.c_str(), fstream::out);
-  audio_fs.open(audio_file.c_str(), fstream::out);
-  Replay(*session.input, video_fs, audio_fs);
-  video_fs.close();
-  audio_fs.close();
+int64 Console::CurrentFrame() {
+  return ppu->frame;
 }
 
 void Console::PixelIndexes(uint8* idx) {
@@ -172,6 +151,7 @@ void Console::NewSession(RecordingMode mode) {
 void Console::LoadSession(istream& in, RecordingMode mode) {
   session.reset(new Session(this, mode));
   session->Load(in);
+  session->FrameEnd();
 }
 
 void Console::LoadSession(const string& filename, RecordingMode mode) {

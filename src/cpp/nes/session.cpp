@@ -83,18 +83,39 @@ Session::Session(Console* console, RecordingMode mode) :
 
 Session::~Session() {}
 
-void Session::RecordFrameStart() {
-  if (mode & RecordingMode::INPUT) {
+bool Session::ShouldRecordInput() {
+  int64 frame = console->CurrentFrame();
+  return (mode & RecordingMode::INPUT) && (frame == (startFrame + input->inputs.size()));
+}
+
+bool Session::ShouldRecordOutput() {
+  int64 frame = console->CurrentFrame();
+  return (mode & RecordingMode::OUTPUT) && (frame - 1 == (startFrame + output->outputs.size()));
+}
+
+bool Session::ShouldReplay() {
+  int64 frame = console->CurrentFrame();
+  return (frame >= startFrame) && (frame < (startFrame + input->inputs.size()));
+}
+
+void Session::FrameStart() {
+  if (ShouldRecordInput()) {
     uint8 buttons1 = console->controller1->buttons;
     uint8 buttons2 = console->controller2->buttons;
     input->RecordInput(buttons1, buttons2);
   }
 }
 
-void Session::RecordFrameEnd() {
-  if (mode & RecordingMode::OUTPUT) {
+void Session::FrameEnd() {
+  if (ShouldRecordOutput()) {
     Screen* screen = console->ppu->front.get();
     output->RecordOutput(screen);
+  }
+  if (ShouldReplay()) {
+    int64 frame = console->CurrentFrame();
+    Input& in = input->inputs[frame - startFrame];
+    console->SetButtons1(in.buttons1);
+    console->SetButtons2(in.buttons2);
   }
 }
 
