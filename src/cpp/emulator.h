@@ -127,7 +127,7 @@ static PyObject * Emulator_get_pixel_indexes(Emulator* self, PyObject *args) {
   static long int dims[] = {Screen::kHeight, Screen::kWidth};
 
   PyObject* array = PyArray_SimpleNew(3, dims, NPY_UINT8);
-  uint8* data = (uint8*) PyArray_DATA(array);
+  uint8* data = (uint8*) PyArray_DATA((PyArrayObject*)array);
   self->console->PixelIndexes(data);
   return array;
 }
@@ -142,7 +142,7 @@ static PyObject * Emulator_get_pixel_values(Emulator* self, PyObject *args) {
   static long int dims[] = {Screen::kHeight, Screen::kWidth, Screen::kNumChannels};
 
   PyObject* array = PyArray_SimpleNew(3, dims, NPY_UINT8);
-  uint8* data = (uint8*) PyArray_DATA(array);
+  uint8* data = (uint8*) PyArray_DATA((PyArrayObject*)array);
   self->console->PixelValues(data);
   return array;
 }
@@ -154,10 +154,10 @@ static PyObject * Emulator_get_audio_samples(Emulator* self, PyObject *args) {
   }
 
   // Dimensions of the game pixels.
-  long int dims[] = { self->console->apu->channel->values.size() };
+  long int dims[] = { static_cast<long int>(self->console->apu->channel->values.size()) };
 
   PyObject* array = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-  uint8* data = (uint8*) PyArray_DATA(array);
+  uint8* data = (uint8*) PyArray_DATA((PyArrayObject*)array);
   self->console->apu->channel->GetAudioSamples(data);
   return array;
 }
@@ -265,7 +265,7 @@ static PyMethodDef Emulator_methods[] = {
   { "load_state", (PyCFunction)Emulator_load_state, METH_VARARGS, "Load NES savestate." },
   { "reset", (PyCFunction)Emulator_reset, METH_VARARGS, "Resets the NES." },
   { "set_input", (PyCFunction)Emulator_set_input, METH_VARARGS, "Set the controller input." },
-  { "emulate", (PyCFunction)Emulator_emulate, METH_KEYWORDS, "Emulate the number of specified frames." },
+  { "emulate", (PyCFunction)Emulator_emulate, METH_VARARGS, "Emulate the number of specified frames." },
   { "get_pixel_indexes", (PyCFunction)Emulator_get_pixel_indexes, METH_VARARGS, "Get an array containing the current pixel indexes. Each index is in the range [0..63]" },
   { "get_pixel_values", (PyCFunction)Emulator_get_pixel_values, METH_VARARGS, "Get an array containing the current RGB pixel values." },
   { "get_audio_samples", (PyCFunction)Emulator_get_audio_samples, METH_VARARGS, "Get the audio samples for the current frame." },

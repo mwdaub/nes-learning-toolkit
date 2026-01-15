@@ -8,17 +8,25 @@ static PyMethodDef nes_methods[] = {
   { NULL, NULL, 0, NULL }
 };
 
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "nes",     // name of module
+    "Python package for NES emulation",
+    -1,
+    nes_methods,
+};
+
 // Initialize the nes module.
-PyMODINIT_FUNC initnes(void) {
+PyMODINIT_FUNC PyInit_nes(void) {
   PyObject *m;
 
   EmulatorType.tp_new = PyType_GenericNew;
   if (PyType_Ready(&EmulatorType) < 0)
-    return;
+    return NULL;
 
-  m = Py_InitModule("nes", nes_methods);
+  m = PyModule_Create(&moduledef);
   if (m == NULL) {
-    return;
+    return NULL;
   }
 
   Py_INCREF(&EmulatorType);
@@ -33,4 +41,5 @@ PyMODINIT_FUNC initnes(void) {
   PyModule_AddObject(m, "error", IllegalStateError);
 
   import_array();
+  return m;
 }

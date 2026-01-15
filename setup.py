@@ -1,11 +1,13 @@
 from distutils.core import setup, Extension
 import glob
+import numpy
 
 sources = ['src/cpp/module.cpp'] + glob.glob('src/cpp/nes/*.cpp')
 
 module1 = Extension('nes',
         sources = sources,
-        extra_compile_args=['-std=c++14'])
+        extra_compile_args=['-std=c++14'],
+        include_dirs=[numpy.get_include()])
 
 setup(name = 'NES',
         version = '1.0',
